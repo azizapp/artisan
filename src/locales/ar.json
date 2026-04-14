@@ -99,7 +99,12 @@
     "activeArtisans": "الحرفيون النشطون",
     "gZone": "منطقة G",
     "pZone": "منطقة P",
-    "list": "قائمة الحرفيين"
+    "list": "قائمة الحرفيين",
+    "deleteTitle": "تأكيد الحذف",
+    "deleteMessage": "هل أنت متأكد من حذف الحرفي \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deactivateTitle": "تأكيد إلغاء التفعيل",
+    "deactivateMessage": "هل أنت متأكد من إلغاء تفعيل الحرفي \"{{name}}\"؟",
+    "deactivate": "إلغاء التفعيل"
   },
   "contribution": {
     "title": "المساهمات",

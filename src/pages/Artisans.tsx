@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Edit2, Trash2, Users, MapPin, Briefcase, Store } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Users, MapPin, Briefcase, Store, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -34,6 +34,44 @@ function StatCard({ title, value, icon, iconBg }: StatCardProps) {
   );
 }
 
+interface ConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText: string;
+  cancelText: string;
+  type?: 'danger' | 'warning';
+}
+
+function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText, type = 'danger' }: ConfirmModalProps) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={title}>
+      <div className="space-y-4">
+        <div className="flex items-start gap-3">
+          <div className={`p-2 rounded-full ${type === 'danger' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+          <p className="text-muted-foreground">{message}</p>
+        </div>
+        <div className="flex gap-3 pt-4">
+          <Button
+            variant={type === 'danger' ? 'destructive' : 'default'}
+            onClick={onConfirm}
+            className="flex-1"
+          >
+            {confirmText}
+          </Button>
+          <Button variant="secondary" onClick={onClose} className="flex-1">
+            {cancelText}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 export function Artisans() {
   const { t } = useTranslation();
   const { artisans, fetchArtisans, createArtisan, updateArtisan, deleteArtisan, toggleArtisanStatus } = useArtisanStore();
@@ -50,6 +88,16 @@ export function Artisans() {
     employee_count: 1,
     trade_id: '',
     is_active: true,
+  });
+
+  // Confirmation modals state
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; artisan: Artisan | null }>({
+    isOpen: false,
+    artisan: null,
+  });
+  const [deactivateConfirm, setDeactivateConfirm] = useState<{ isOpen: boolean; artisan: Artisan | null }>({
+    isOpen: false,
+    artisan: null,
   });
 
   useEffect(() => {
@@ -111,9 +159,45 @@ export function Artisans() {
     setEditingArtisan(null);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm(t('artisan.confirmDelete'))) {
-      await deleteArtisan(id);
+  // Delete confirmation handlers
+  const openDeleteConfirm = (artisan: Artisan) => {
+    setDeleteConfirm({ isOpen: true, artisan });
+  };
+
+  const closeDeleteConfirm = () => {
+    setDeleteConfirm({ isOpen: false, artisan: null });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirm.artisan) {
+      await deleteArtisan(deleteConfirm.artisan.id);
+      closeDeleteConfirm();
+    }
+  };
+
+  // Deactivate confirmation handlers
+  const openDeactivateConfirm = (artisan: Artisan) => {
+    setDeactivateConfirm({ isOpen: true, artisan });
+  };
+
+  const closeDeactivateConfirm = () => {
+    setDeactivateConfirm({ isOpen: false, artisan: null });
+  };
+
+  const handleDeactivateConfirm = async () => {
+    if (deactivateConfirm.artisan) {
+      await toggleArtisanStatus(deactivateConfirm.artisan.id, !deactivateConfirm.artisan.is_active);
+      closeDeactivateConfirm();
+    }
+  };
+
+  const handleStatusToggle = (artisan: Artisan) => {
+    if (artisan.is_active) {
+      // If currently active, show deactivate confirmation
+      openDeactivateConfirm(artisan);
+    } else {
+      // If currently inactive, activate immediately without confirmation
+      toggleArtisanStatus(artisan.id, true);
     }
   };
 
@@ -231,11 +315,11 @@ export function Artisans() {
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => toggleArtisanStatus(artisan.id, !artisan.is_active)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        onClick={() => handleStatusToggle(artisan)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                           artisan.is_active
-                            ? 'bg-green-500/10 text-green-500'
-                            : 'bg-red-500/10 text-red-500'
+                            ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
+                            : 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
                         }`}
                       >
                         {artisan.is_active ? t('common.active') : t('common.inactive')}
@@ -251,7 +335,7 @@ export function Artisans() {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(artisan.id)}
+                          onClick={() => openDeleteConfirm(artisan)}
                           className="p-2 rounded-lg hover:bg-muted text-red-500"
                           title={t('common.delete')}
                         >
@@ -362,6 +446,30 @@ export function Artisans() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={closeDeleteConfirm}
+        onConfirm={handleDeleteConfirm}
+        title={t('artisan.deleteTitle')}
+        message={t('artisan.deleteMessage', { name: deleteConfirm.artisan?.full_name })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        type="danger"
+      />
+
+      {/* Deactivate Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deactivateConfirm.isOpen}
+        onClose={closeDeactivateConfirm}
+        onConfirm={handleDeactivateConfirm}
+        title={t('artisan.deactivateTitle')}
+        message={t('artisan.deactivateMessage', { name: deactivateConfirm.artisan?.full_name })}
+        confirmText={t('artisan.deactivate')}
+        cancelText={t('common.cancel')}
+        type="warning"
+      />
     </div>
   );
 }

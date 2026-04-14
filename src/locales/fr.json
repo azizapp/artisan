@@ -99,7 +99,12 @@
     "activeArtisans": "Artisans Actifs",
     "gZone": "Zone G",
     "pZone": "Zone P",
-    "list": "Liste des Artisans"
+    "list": "Liste des Artisans",
+    "deleteTitle": "Confirmer la Suppression",
+    "deleteMessage": "Êtes-vous sûr de vouloir supprimer l'artisan \"{{name}}\" ? Cette action est irréversible.",
+    "deactivateTitle": "Confirmer la Désactivation",
+    "deactivateMessage": "Êtes-vous sûr de vouloir désactiver l'artisan \"{{name}}\" ?",
+    "deactivate": "Désactiver"
   },
   "contribution": {
     "title": "Contributions",
