@@ -193,6 +193,9 @@ export function Artisans() {
                     {t('artisan.nationalId')}
                   </th>
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
+                    {t('artisan.shopNumber')}
+                  </th>
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('artisan.trade')}
                   </th>
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
@@ -216,6 +219,9 @@ export function Artisans() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {artisan.national_id}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {artisan.shop_number}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {artisan.trade?.name_ar}
