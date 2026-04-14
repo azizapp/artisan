@@ -11,6 +11,8 @@ import {
   LogOut,
   Menu,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -18,6 +20,7 @@ export function Sidebar() {
   const { t } = useTranslation();
   const { logout } = useAuthStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const navItems = [
     { path: '/', icon: LayoutDashboard, label: t('nav.dashboard') },
@@ -34,6 +37,10 @@ export function Sidebar() {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   return (
@@ -63,19 +70,36 @@ export function Sidebar() {
       <aside
         className={`
           fixed lg:static inset-y-0 left-0 z-50
-          w-64 h-screen bg-background border-e border-border flex flex-col
-          transform transition-transform duration-300 ease-in-out
+          h-screen bg-background border-e border-border flex flex-col
+          transform transition-all duration-300 ease-in-out
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
+          w-64
         `}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-border">
-          <h1 className="text-xl font-bold text-primary">
-            {t('app.name')}
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1">
-            {t('app.tagline')}
-          </p>
+        <div className="p-6 border-b border-border flex items-center justify-between">
+          <div className={`overflow-hidden transition-all duration-300 ${isCollapsed ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>
+            <h1 className="text-xl font-bold text-primary whitespace-nowrap">
+              {t('app.name')}
+            </h1>
+            <p className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
+              {t('app.tagline')}
+            </p>
+          </div>
+          
+          {/* Collapse Toggle Button - Desktop Only */}
+          <button
+            onClick={toggleCollapse}
+            className="hidden lg:flex p-1.5 rounded-lg hover:bg-muted transition-colors"
+            title={isCollapsed ? t('common.expand') : t('common.collapse')}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            ) : (
+              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+            )}
+          </button>
         </div>
 
         {/* Navigation */}
@@ -90,11 +114,13 @@ export function Sidebar() {
                   isActive
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:bg-muted'
-                }`
+                } ${isCollapsed ? 'lg:justify-center' : ''}`
               }
             >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <span className={`font-medium whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'lg:w-0 lg:opacity-0 lg:hidden' : 'w-auto opacity-100'}`}>
+                {item.label}
+              </span>
             </NavLink>
           ))}
         </nav>
@@ -103,10 +129,12 @@ export function Sidebar() {
         <div className="p-4 border-t border-border">
           <button
             onClick={logout}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+            className={`flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all ${isCollapsed ? 'lg:justify-center' : ''}`}
           >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">{t('nav.logout')}</span>
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <span className={`font-medium whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'lg:w-0 lg:opacity-0 lg:hidden' : 'w-auto opacity-100'}`}>
+              {t('nav.logout')}
+            </span>
           </button>
         </div>
       </aside>

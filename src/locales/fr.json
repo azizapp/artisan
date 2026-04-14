@@ -34,7 +34,10 @@
     "status": "Statut",
     "active": "Actif",
     "inactive": "Inactif",
-    "all": "Tous"
+    "all": "Tous",
+    "menu": "Menu",
+    "collapse": "Réduire",
+    "expand": "Développer"
   },
   "dashboard": {
     "title": "Tableau de bord",

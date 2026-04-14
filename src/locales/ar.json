@@ -34,7 +34,10 @@
     "status": "الحالة",
     "active": "نشط",
     "inactive": "غير نشط",
-    "all": "الكل"
+    "all": "الكل",
+    "menu": "القائمة",
+    "collapse": "تقليص",
+    "expand": "توسيع"
   },
   "dashboard": {
     "title": "لوحة التحكم",
