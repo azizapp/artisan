@@ -198,7 +198,12 @@
     "user": "Utilisateur",
     "isActive": "Actif",
     "searchPlaceholder": "Rechercher par nom ou email...",
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?"
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
+    "deleteTitle": "Confirmer la Suppression",
+    "deleteMessage": "Êtes-vous sûr de vouloir supprimer l'utilisateur \"{{name}}\" ? Cette action est irréversible.",
+    "deactivateTitle": "Confirmer la Désactivation",
+    "deactivateMessage": "Êtes-vous sûr de vouloir désactiver l'utilisateur \"{{name}}\" ?",
+    "deactivate": "Désactiver"
   },
   "auth": {
     "login": "Connexion",

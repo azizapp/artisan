@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Edit2, Trash2, UserCheck, UserX } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, UserCheck, UserX, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -15,6 +15,52 @@ interface UserFormData {
   password: string;
   role: 'admin' | 'user';
   is_active: boolean;
+}
+
+interface ConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText: string;
+  cancelText: string;
+  type?: 'danger' | 'warning';
+}
+
+function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText, type = 'danger' }: ConfirmModalProps) {
+  const isDanger = type === 'danger';
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="space-y-0">
+        {/* Header with colored background */}
+        <div className={`${isDanger ? 'bg-red-500' : 'bg-amber-500'} -mx-6 -mt-6 px-6 py-4 mb-6`}>
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-6 h-6 text-white" />
+            <h2 className="text-xl font-semibold text-white">{title}</h2>
+          </div>
+        </div>
+
+        {/* Message */}
+        <p className="text-foreground text-base">{message}</p>
+
+        {/* Buttons */}
+        <div className="flex gap-3 pt-6">
+          <Button
+            variant={isDanger ? 'destructive' : 'default'}
+            onClick={onConfirm}
+            className="flex-1"
+          >
+            {confirmText}
+          </Button>
+          <Button variant="secondary" onClick={onClose} className="flex-1">
+            {cancelText}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
 }
 
 export function Users() {
@@ -32,6 +78,16 @@ export function Users() {
     is_active: true,
   });
 
+  // Confirmation modals state
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; user: User | null }>({
+    isOpen: false,
+    user: null,
+  });
+  const [deactivateConfirm, setDeactivateConfirm] = useState<{ isOpen: boolean; user: User | null }>({
+    isOpen: false,
+    user: null,
+  });
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -44,7 +100,7 @@ export function Users() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingUser) {
       const updateData: Partial<UserFormData> = {
         full_name: formData.full_name,
@@ -55,7 +111,7 @@ export function Users() {
     } else {
       await createUser(formData);
     }
-    
+
     closeModal();
   };
 
@@ -87,16 +143,50 @@ export function Users() {
     setEditingUser(null);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm(t('user.confirmDelete'))) {
-      await deleteUser(id);
+  // Delete handlers
+  const openDeleteConfirm = (user: User) => {
+    setDeleteConfirm({ isOpen: true, user });
+  };
+
+  const closeDeleteConfirm = () => {
+    setDeleteConfirm({ isOpen: false, user: null });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirm.user) {
+      await deleteUser(deleteConfirm.user.id);
+      closeDeleteConfirm();
+    }
+  };
+
+  // Deactivate handlers
+  const openDeactivateConfirm = (user: User) => {
+    setDeactivateConfirm({ isOpen: true, user });
+  };
+
+  const closeDeactivateConfirm = () => {
+    setDeactivateConfirm({ isOpen: false, user: null });
+  };
+
+  const handleDeactivateConfirm = async () => {
+    if (deactivateConfirm.user) {
+      await toggleUserStatus(deactivateConfirm.user.id, false);
+      closeDeactivateConfirm();
+    }
+  };
+
+  const handleStatusToggle = (user: User) => {
+    if (user.is_active ?? true) {
+      openDeactivateConfirm(user);
+    } else {
+      toggleUserStatus(user.id, true);
     }
   };
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--text-h)]">
+        <h1 className="text-2xl font-bold text-foreground">
           {t('settings.userManagement')}
         </h1>
         <Button onClick={() => openModal()}>
@@ -107,7 +197,7 @@ export function Users() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text)]" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
           type="text"
           placeholder={t('user.searchPlaceholder')}
@@ -122,37 +212,35 @@ export function Users() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[var(--border)]">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('auth.email')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('artisan.fullName')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('user.role')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('common.status')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('artisan.createdAt')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('common.actions')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-[var(--border)]/50">
+                  <tr key={user.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-[var(--text-h)]">
-                        {user.email}
-                      </p>
+                      <p className="font-medium text-foreground">{user.email}</p>
                     </td>
-                    <td className="px-4 py-3 text-[var(--text)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {user.full_name}
                     </td>
                     <td className="px-4 py-3">
@@ -166,7 +254,7 @@ export function Users() {
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => toggleUserStatus(user.id, !(user.is_active ?? true))}
+                        onClick={() => handleStatusToggle(user)}
                         className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                           (user.is_active ?? true)
                             ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
@@ -186,21 +274,21 @@ export function Users() {
                         )}
                       </button>
                     </td>
-                    <td className="px-4 py-3 text-[var(--text)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {formatDate(user.created_at)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => openModal(user)}
-                          className="p-2 rounded-lg hover:bg-[var(--border)] text-blue-500"
+                          className="p-2 rounded-lg hover:bg-muted text-blue-500"
                           title={t('common.edit')}
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(user.id)}
-                          className="p-2 rounded-lg hover:bg-[var(--border)] text-red-500"
+                          onClick={() => openDeleteConfirm(user)}
+                          className="p-2 rounded-lg hover:bg-muted text-red-500"
                           title={t('common.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -212,7 +300,7 @@ export function Users() {
               </tbody>
             </table>
             {filteredUsers.length === 0 && (
-              <p className="text-center text-[var(--text)] py-8">
+              <p className="text-center text-muted-foreground py-8">
                 {t('common.noData')}
               </p>
             )}
@@ -252,13 +340,13 @@ export function Users() {
             />
           )}
           <div>
-            <label className="block text-sm font-medium text-[var(--text-h)] mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               {t('user.role')}
             </label>
             <select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'user' })}
-              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)] outline-none"
+              className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
               required
             >
               <option value="user">{t('user.user')}</option>
@@ -271,9 +359,9 @@ export function Users() {
               id="is_active"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="w-4 h-4 rounded border-[var(--border)] text-[var(--accent)] focus:ring-[var(--accent)]"
+              className="w-4 h-4 rounded border-input text-primary focus:ring-primary"
             />
-            <label htmlFor="is_active" className="text-sm text-[var(--text-h)]">
+            <label htmlFor="is_active" className="text-sm text-foreground">
               {t('user.isActive')}
             </label>
           </div>
@@ -287,6 +375,30 @@ export function Users() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={closeDeleteConfirm}
+        onConfirm={handleDeleteConfirm}
+        title={t('user.deleteTitle')}
+        message={t('user.deleteMessage', { name: deleteConfirm.user?.full_name })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        type="danger"
+      />
+
+      {/* Deactivate Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deactivateConfirm.isOpen}
+        onClose={closeDeactivateConfirm}
+        onConfirm={handleDeactivateConfirm}
+        title={t('user.deactivateTitle')}
+        message={t('user.deactivateMessage', { name: deactivateConfirm.user?.full_name })}
+        confirmText={t('user.deactivate')}
+        cancelText={t('common.cancel')}
+        type="warning"
+      />
     </div>
   );
 }
