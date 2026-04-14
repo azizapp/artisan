@@ -46,18 +46,26 @@ interface ConfirmModalProps {
 }
 
 function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText, type = 'danger' }: ConfirmModalProps) {
+  const isDanger = type === 'danger';
+  
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <div className="space-y-4">
-        <div className="flex items-start gap-3">
-          <div className={`p-2 rounded-full ${type === 'danger' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
-            <AlertTriangle className="w-5 h-5" />
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="space-y-0">
+        {/* Header with red background */}
+        <div className={`${isDanger ? 'bg-red-500' : 'bg-amber-500'} -mx-6 -mt-6 px-6 py-4 mb-6`}>
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-6 h-6 text-white" />
+            <h2 className="text-xl font-semibold text-white">{title}</h2>
           </div>
-          <p className="text-muted-foreground">{message}</p>
         </div>
-        <div className="flex gap-3 pt-4">
+        
+        {/* Message */}
+        <p className="text-foreground text-base">{message}</p>
+        
+        {/* Buttons */}
+        <div className="flex gap-3 pt-6">
           <Button
-            variant={type === 'danger' ? 'destructive' : 'default'}
+            variant={isDanger ? 'destructive' : 'default'}
             onClick={onConfirm}
             className="flex-1"
           >
