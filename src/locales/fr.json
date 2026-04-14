@@ -120,7 +120,9 @@
     "totalAmount": "Montant Total",
     "searchPlaceholder": "Rechercher par artisan ou occasion...",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette contribution ?",
-    "selectArtisan": "Sélectionner l'Artisan"
+    "selectArtisan": "Sélectionner l'Artisan",
+    "deleteTitle": "Confirmer la Suppression",
+    "deleteMessage": "Êtes-vous sûr de vouloir supprimer la contribution de '{{artisan}}' d'un montant de {{amount}} ? Cette action est irréversible."
   },
   "expense": {
     "title": "Dépenses",
@@ -134,7 +136,9 @@
     "notesPlaceholder": "Notes supplémentaires...",
     "totalAmount": "Montant Total",
     "searchPlaceholder": "Rechercher par sujet ou notes...",
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette dépense ?"
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette dépense ?",
+    "deleteTitle": "Confirmer la Suppression",
+    "deleteMessage": "Êtes-vous sûr de vouloir supprimer la dépense '{{subject}}' d'un montant de {{amount}} ? Cette action est irréversible."
   },
   "trade": {
     "title": "Métiers",

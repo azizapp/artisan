@@ -120,7 +120,9 @@
     "totalAmount": "إجمالي المساهمات",
     "searchPlaceholder": "البحث بالحرفي أو المناسبة...",
     "confirmDelete": "هل أنت متأكد من حذف هذه المساهمة؟",
-    "selectArtisan": "اختر الحرفي"
+    "selectArtisan": "اختر الحرفي",
+    "deleteTitle": "تأكيد الحذف",
+    "deleteMessage": "هل أنت متأكد من حذف مساهمة '{{artisan}}' بمبلغ {{amount}}؟ لا يمكن التراجع عن هذا الإجراء."
   },
   "expense": {
     "title": "المصاريف",
@@ -134,7 +136,9 @@
     "notesPlaceholder": "أي ملاحظات إضافية...",
     "totalAmount": "إجمالي المصاريف",
     "searchPlaceholder": "البحث بالموضوع أو الملاحظات...",
-    "confirmDelete": "هل أنت متأكد من حذف هذا المصروف؟"
+    "confirmDelete": "هل أنت متأكد من حذف هذا المصروف؟",
+    "deleteTitle": "تأكيد الحذف",
+    "deleteMessage": "هل أنت متأكد من حذف المصروف '{{subject}}' بمبلغ {{amount}}؟ لا يمكن التراجع عن هذا الإجراء."
   },
   "trade": {
     "title": "المهن",

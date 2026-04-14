@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Edit2, Trash2, Calendar, Wallet } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Calendar, Wallet, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -10,6 +10,49 @@ import { useArtisanStore } from '../stores/artisanStore';
 import { formatCurrency, formatDate } from '../lib/utils';
 import type { Contribution, ContributionFormData } from '../types';
 
+interface ConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText: string;
+  cancelText: string;
+}
+
+function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText }: ConfirmModalProps) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="space-y-0">
+        {/* Header with red background */}
+        <div className="bg-red-500 -mx-6 -mt-6 px-6 py-4 mb-6">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-6 h-6 text-white" />
+            <h2 className="text-xl font-semibold text-white">{title}</h2>
+          </div>
+        </div>
+
+        {/* Message */}
+        <p className="text-foreground text-base">{message}</p>
+
+        {/* Buttons */}
+        <div className="flex gap-3 pt-6">
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            className="flex-1"
+          >
+            {confirmText}
+          </Button>
+          <Button variant="secondary" onClick={onClose} className="flex-1">
+            {cancelText}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 export function Contributions() {
   const { t } = useTranslation();
   const { contributions, fetchContributions, createContribution, updateContribution, deleteContribution } = useContributionStore();
@@ -18,6 +61,10 @@ export function Contributions() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingContribution, setEditingContribution] = useState<Contribution | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; contribution: Contribution | null }>({
+    isOpen: false,
+    contribution: null,
+  });
   const [formData, setFormData] = useState<ContributionFormData>({
     artisan_id: '',
     occasion: '',
@@ -79,9 +126,18 @@ export function Contributions() {
     setEditingContribution(null);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm(t('contribution.confirmDelete'))) {
-      await deleteContribution(id);
+  const openDeleteConfirm = (contribution: Contribution) => {
+    setDeleteConfirm({ isOpen: true, contribution });
+  };
+
+  const closeDeleteConfirm = () => {
+    setDeleteConfirm({ isOpen: false, contribution: null });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirm.contribution) {
+      await deleteContribution(deleteConfirm.contribution.id);
+      closeDeleteConfirm();
     }
   };
 
@@ -206,7 +262,7 @@ export function Contributions() {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(contribution.id)}
+                          onClick={() => openDeleteConfirm(contribution)}
                           className="p-2 rounded-lg hover:bg-[var(--border)] text-red-500"
                           title={t('common.delete')}
                         >
@@ -311,6 +367,20 @@ export function Contributions() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={closeDeleteConfirm}
+        onConfirm={handleDeleteConfirm}
+        title={t('contribution.deleteTitle')}
+        message={t('contribution.deleteMessage', { 
+          artisan: deleteConfirm.contribution?.artisan?.full_name,
+          amount: deleteConfirm.contribution ? formatCurrency(deleteConfirm.contribution.amount) : ''
+        })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+      />
     </div>
   );
 }

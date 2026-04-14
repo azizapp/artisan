@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Edit2, Trash2, Receipt, Calendar } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Receipt, Calendar, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -8,6 +8,40 @@ import { Modal } from '../components/ui/Modal';
 import { useExpenseStore } from '../stores/expenseStore';
 import { formatCurrency, formatDate } from '../lib/utils';
 import type { Expense, ExpenseFormData } from '../types';
+
+interface ConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText: string;
+  cancelText: string;
+}
+
+function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText }: ConfirmModalProps) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="space-y-0">
+        <div className="bg-red-500 -mx-6 -mt-6 px-6 py-4 mb-6">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-6 h-6 text-white" />
+            <h2 className="text-xl font-semibold text-white">{title}</h2>
+          </div>
+        </div>
+        <p className="text-foreground text-base">{message}</p>
+        <div className="flex gap-3 pt-6">
+          <Button variant="destructive" onClick={onConfirm} className="flex-1">
+            {confirmText}
+          </Button>
+          <Button variant="secondary" onClick={onClose} className="flex-1">
+            {cancelText}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
 
 export function Expenses() {
   const { t } = useTranslation();
@@ -21,6 +55,10 @@ export function Expenses() {
     amount: 0,
     expense_date: new Date().toISOString().split('T')[0],
     notes: '',
+  });
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; expense: Expense | null }>({
+    isOpen: false,
+    expense: null,
   });
 
   useEffect(() => {
@@ -73,9 +111,18 @@ export function Expenses() {
     setEditingExpense(null);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm(t('expense.confirmDelete'))) {
-      await deleteExpense(id);
+  const openDeleteConfirm = (expense: Expense) => {
+    setDeleteConfirm({ isOpen: true, expense });
+  };
+
+  const closeDeleteConfirm = () => {
+    setDeleteConfirm({ isOpen: false, expense: null });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirm.expense) {
+      await deleteExpense(deleteConfirm.expense.id);
+      closeDeleteConfirm();
     }
   };
 
@@ -191,7 +238,7 @@ export function Expenses() {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(expense.id)}
+                          onClick={() => openDeleteConfirm(expense)}
                           className="p-2 rounded-lg hover:bg-[var(--border)] text-red-500"
                           title={t('common.delete')}
                         >
@@ -278,6 +325,18 @@ export function Expenses() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={closeDeleteConfirm}
+        onConfirm={handleDeleteConfirm}
+        title={t('expense.deleteTitle')}
+        message={t('expense.deleteMessage', {
+          name: deleteConfirm.expense?.subject,
+        })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+      />
     </div>
   );
 }
