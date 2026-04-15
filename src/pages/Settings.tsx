@@ -5,6 +5,7 @@ import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
+import { Pagination } from '../components/ui/Pagination';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useTradeStore } from '../stores/tradeStore';
 import { useUserStore } from '../stores/userStore';
@@ -119,10 +120,30 @@ export function Settings() {
     user: null,
   });
 
+  // Pagination state for trades
+  const [tradesCurrentPage, setTradesCurrentPage] = useState(1);
+  const [tradesPageSize, setTradesPageSize] = useState(10);
+
+  // Pagination state for users
+  const [usersCurrentPage, setUsersCurrentPage] = useState(1);
+  const [usersPageSize, setUsersPageSize] = useState(10);
+
   useEffect(() => {
     fetchTrades();
     fetchUsers();
   }, []);
+
+  // Reset trades pagination when modal opens
+  useEffect(() => {
+    if (isTradesSectionOpen) {
+      setTradesCurrentPage(1);
+    }
+  }, [isTradesSectionOpen]);
+
+  // Reset users pagination when search changes
+  useEffect(() => {
+    setUsersCurrentPage(1);
+  }, [userSearchTerm]);
 
   // Trade handlers
   const openTradeModal = (trade?: Trade) => {
@@ -167,11 +188,25 @@ export function Settings() {
     }
   };
 
+  // Trades pagination calculations
+  const tradesTotalPages = Math.ceil(trades.length / tradesPageSize);
+  const paginatedTrades = trades.slice(
+    (tradesCurrentPage - 1) * tradesPageSize,
+    tradesCurrentPage * tradesPageSize
+  );
+
   // User handlers
   const filteredUsers = users.filter(
     (user) =>
       user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(userSearchTerm.toLowerCase())
+  );
+
+  // Users pagination calculations
+  const usersTotalPages = Math.ceil(filteredUsers.length / usersPageSize);
+  const paginatedUsers = filteredUsers.slice(
+    (usersCurrentPage - 1) * usersPageSize,
+    usersCurrentPage * usersPageSize
   );
 
   const openUserModal = (user?: User) => {
@@ -470,7 +505,7 @@ export function Settings() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {trades.map((trade) => (
+                {paginatedTrades.map((trade) => (
                   <tr key={trade.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3 text-foreground">{trade.name_ar}</td>
                     <td className="px-4 py-3 text-muted-foreground">{trade.name_fr}</td>
@@ -500,6 +535,19 @@ export function Settings() {
               <p className="text-center text-muted-foreground py-8">{t('common.noData')}</p>
             )}
           </div>
+          {trades.length > 0 && (
+            <Pagination
+              currentPage={tradesCurrentPage}
+              totalPages={tradesTotalPages}
+              pageSize={tradesPageSize}
+              onPageChange={setTradesCurrentPage}
+              onPageSizeChange={(size) => {
+                setTradesPageSize(size);
+                setTradesCurrentPage(1);
+              }}
+              totalItems={trades.length}
+            />
+          )}
         </div>
       </Modal>
 
@@ -548,7 +596,7 @@ export function Settings() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredUsers.map((user) => (
+                {paginatedUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3">
                       <p className="font-medium text-foreground">{user.email}</p>
@@ -613,6 +661,19 @@ export function Settings() {
               <p className="text-center text-muted-foreground py-8">{t('common.noData')}</p>
             )}
           </div>
+          {filteredUsers.length > 0 && (
+            <Pagination
+              currentPage={usersCurrentPage}
+              totalPages={usersTotalPages}
+              pageSize={usersPageSize}
+              onPageChange={setUsersCurrentPage}
+              onPageSizeChange={(size) => {
+                setUsersPageSize(size);
+                setUsersCurrentPage(1);
+              }}
+              totalItems={filteredUsers.length}
+            />
+          )}
         </div>
       </Modal>
 

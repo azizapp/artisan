@@ -5,6 +5,7 @@ import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
+import { Pagination } from '../components/ui/Pagination';
 import { useContributionStore } from '../stores/contributionStore';
 import { useExpenseStore } from '../stores/expenseStore';
 import { useArtisanStore } from '../stores/artisanStore';
@@ -75,16 +76,32 @@ export function Contributions() {
     notes: '',
   });
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   useEffect(() => {
     fetchContributions();
     fetchExpenses();
     fetchArtisans();
   }, []);
 
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filteredContributions = contributions.filter(
     (contribution) =>
       contribution.artisan?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contribution.occasion.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredContributions.length / pageSize);
+  const paginatedContributions = filteredContributions.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
   );
 
   const totalAmount = contributions.reduce((sum, c) => sum + c.amount, 0);
@@ -248,7 +265,7 @@ export function Contributions() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredContributions.map((contribution) => (
+                {paginatedContributions.map((contribution) => (
                   <tr key={contribution.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3">
                       <p className="font-medium text-foreground">
@@ -300,6 +317,19 @@ export function Contributions() {
               </p>
             )}
           </div>
+          {filteredContributions.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setCurrentPage(1);
+              }}
+              totalItems={filteredContributions.length}
+            />
+          )}
         </CardContent>
       </Card>
 

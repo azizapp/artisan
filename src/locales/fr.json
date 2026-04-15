@@ -38,7 +38,10 @@
     "menu": "Menu",
     "collapse": "Réduire",
     "expand": "Développer",
-    "manage": "Gérer"
+    "manage": "Gérer",
+    "show": "Afficher",
+    "of": "sur",
+    "items": "éléments"
   },
   "dashboard": {
     "title": "Tableau de bord",

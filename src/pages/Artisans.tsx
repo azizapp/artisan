@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
+import { Pagination } from '../components/ui/Pagination';
 import { useArtisanStore } from '../stores/artisanStore';
 import { useTradeStore } from '../stores/tradeStore';
 import type { Artisan, ArtisanFormData } from '../types';
@@ -115,16 +116,32 @@ export function Artisans() {
     artisan: null,
   });
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   useEffect(() => {
     fetchArtisans();
     fetchTrades();
   }, []);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const filteredArtisans = artisans.filter(
     (artisan) =>
       artisan.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       artisan.national_id.includes(searchTerm) ||
       artisan.shop_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredArtisans.length / pageSize);
+  const paginatedArtisans = filteredArtisans.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
   );
 
   const activeArtisans = artisans.filter(a => a.is_active).length;
@@ -313,7 +330,7 @@ export function Artisans() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredArtisans.map((artisan) => (
+                {paginatedArtisans.map((artisan) => (
                   <tr key={artisan.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3">
                       <p className="font-medium text-foreground">
@@ -379,6 +396,19 @@ export function Artisans() {
               </p>
             )}
           </div>
+          {filteredArtisans.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setCurrentPage(1);
+              }}
+              totalItems={filteredArtisans.length}
+            />
+          )}
         </CardContent>
       </Card>
 

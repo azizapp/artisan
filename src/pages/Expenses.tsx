@@ -5,6 +5,7 @@ import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
+import { Pagination } from '../components/ui/Pagination';
 import { useExpenseStore } from '../stores/expenseStore';
 import { useContributionStore } from '../stores/contributionStore';
 import { formatCurrency, formatDate } from '../lib/utils';
@@ -63,15 +64,31 @@ export function Expenses() {
     expense: null,
   });
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   useEffect(() => {
     fetchExpenses();
     fetchContributions();
   }, []);
 
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filteredExpenses = expenses.filter(
     (expense) =>
       expense.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (expense.notes && expense.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredExpenses.length / pageSize);
+  const paginatedExpenses = filteredExpenses.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
   );
 
   const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -230,7 +247,7 @@ export function Expenses() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredExpenses.map((expense) => (
+                {paginatedExpenses.map((expense) => (
                   <tr key={expense.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3">
                       <p className="font-medium text-foreground">
@@ -276,6 +293,19 @@ export function Expenses() {
               </p>
             )}
           </div>
+          {filteredExpenses.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setCurrentPage(1);
+              }}
+              totalItems={filteredExpenses.length}
+            />
+          )}
         </CardContent>
       </Card>
 
