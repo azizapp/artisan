@@ -21,6 +21,7 @@ export interface Artisan {
   id: string;
   full_name: string;
   national_id: string;
+  phone?: string | null;
   shop_number: string;
   area: string;
   employee_count: number;
@@ -86,6 +87,7 @@ export interface DashboardStats {
 export interface ArtisanFormData {
   full_name: string;
   national_id: string;
+  phone?: string;
   shop_number: string;
   area: string;
   employee_count: number;

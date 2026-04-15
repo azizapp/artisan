@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   TrendingUp, 
@@ -6,11 +6,13 @@ import {
   Users, 
   Wallet, 
   Package,
+  Briefcase,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { useArtisanStore } from '../stores/artisanStore';
 import { useContributionStore } from '../stores/contributionStore';
 import { useExpenseStore } from '../stores/expenseStore';
+import { useTradeStore } from '../stores/tradeStore';
 import { formatCurrency } from '../lib/utils';
 import {
   AreaChart,
@@ -95,6 +97,7 @@ export function Dashboard() {
   const { artisans, fetchArtisans } = useArtisanStore();
   const { contributions, fetchContributions } = useContributionStore();
   const { expenses, fetchExpenses } = useExpenseStore();
+  const { trades, fetchTrades } = useTradeStore();
 
   const [stats, setStats] = useState<DashboardStats>({
     total_artisans: 0,
@@ -135,6 +138,7 @@ export function Dashboard() {
     fetchArtisans();
     fetchContributions();
     fetchExpenses();
+    fetchTrades();
   }, []);
 
   useEffect(() => {
@@ -210,61 +214,32 @@ export function Dashboard() {
     },
   ];
 
-  const recentActivities = [
-    {
-      icon: <Users className="w-4 h-4 text-white" />,
-      iconBg: 'bg-amber-600',
-      title: t('dashboard.carpenter'),
-      description: t('dashboard.carpenterDesc'),
-      time: '2 minutes ago',
-      badge: t('dashboard.trade'),
-      badgeColor: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-    },
-    {
-      icon: <Users className="w-4 h-4 text-white" />,
-      iconBg: 'bg-slate-600',
-      title: t('dashboard.blacksmith'),
-      description: t('dashboard.blacksmithDesc'),
-      time: '15 minutes ago',
-      badge: t('dashboard.trade'),
-      badgeColor: 'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400',
-    },
-    {
-      icon: <Users className="w-4 h-4 text-white" />,
-      iconBg: 'bg-blue-600',
-      title: t('dashboard.mechanic'),
-      description: t('dashboard.mechanicDesc'),
-      time: '1 hour ago',
-      badge: t('dashboard.trade'),
-      badgeColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    },
-    {
-      icon: <Users className="w-4 h-4 text-white" />,
-      iconBg: 'bg-orange-600',
-      title: t('dashboard.builder'),
-      description: t('dashboard.builderDesc'),
-      time: '2 hours ago',
-      badge: t('dashboard.trade'),
-      badgeColor: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    },
-    {
-      icon: <Users className="w-4 h-4 text-white" />,
-      iconBg: 'bg-yellow-600',
-      title: t('dashboard.electrician'),
-      description: t('dashboard.electricianDesc'),
-      time: '3 hours ago',
-      badge: t('dashboard.trade'),
-      badgeColor: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    },
-    {
-      icon: <Users className="w-4 h-4 text-white" />,
-      iconBg: 'bg-emerald-600',
-      title: t('dashboard.plumber'),
-      description: t('dashboard.plumberDesc'),
-      time: '4 hours ago',
-      badge: t('dashboard.trade'),
-      badgeColor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-    },
+  // Calculate trade statistics - count artisans per trade
+  const tradeStats = useMemo(() => {
+    const stats = trades.map((trade) => {
+      const count = artisans.filter((artisan) => artisan.trade_id === trade.id).length;
+      return {
+        trade,
+        count,
+      };
+    }).filter((stat) => stat.count > 0) // Only show trades with artisans
+      .sort((a, b) => b.count - a.count); // Sort by count descending
+    
+    return stats;
+  }, [trades, artisans]);
+
+  // Generate colors for trade items
+  const tradeColors = [
+    { bg: 'bg-amber-600', badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+    { bg: 'bg-slate-600', badge: 'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400' },
+    { bg: 'bg-blue-600', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    { bg: 'bg-orange-600', badge: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+    { bg: 'bg-yellow-600', badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+    { bg: 'bg-emerald-600', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+    { bg: 'bg-purple-600', badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+    { bg: 'bg-pink-600', badge: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400' },
+    { bg: 'bg-cyan-600', badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400' },
+    { bg: 'bg-indigo-600', badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' },
   ];
 
   return (
@@ -372,16 +347,32 @@ export function Dashboard() {
         </Card>
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Activity - Trade Statistics */}
       <Card>
         <CardHeader>
           <CardTitle>{t('dashboard.recentActivity')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-0">
-            {recentActivities.map((activity, index) => (
-              <ActivityItem key={index} {...activity} />
-            ))}
+            {tradeStats.length > 0 ? (
+              tradeStats.map((stat, index) => {
+                const colors = tradeColors[index % tradeColors.length];
+                return (
+                  <ActivityItem
+                    key={stat.trade.id}
+                    icon={<Briefcase className="w-4 h-4 text-white" />}
+                    iconBg={colors.bg}
+                    title={stat.trade.name_ar}
+                    description={`${stat.count} ${stat.count === 1 ? t('artisan.title') : t('dashboard.totalArtisans')}`}
+                    time=""
+                    badge={stat.trade.name_fr}
+                    badgeColor={colors.badge}
+                  />
+                );
+              })
+            ) : (
+              <p className="text-center text-muted-foreground py-8">{t('common.noData')}</p>
+            )}
           </div>
         </CardContent>
       </Card>

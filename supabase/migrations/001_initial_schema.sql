@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS artisans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   full_name TEXT NOT NULL,
   national_id TEXT UNIQUE NOT NULL,
+  phone TEXT,
   shop_number TEXT NOT NULL,
   area TEXT NOT NULL,
   employee_count INTEGER DEFAULT 0,

@@ -9,6 +9,7 @@ import { Contributions } from './pages/Contributions';
 import { Expenses } from './pages/Expenses';
 import { Reports } from './pages/Reports';
 import { Users } from './pages/Users';
+import { Settings as SettingsPage } from './pages/Settings';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import './lib/i18n';
@@ -96,6 +97,14 @@ function App() {
         />
         <Route
           path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
           element={
             <ProtectedRoute>
               <Users />

@@ -21,10 +21,10 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
-      theme: 'light',
+      theme: 'dark',
       language: 'ar',
-      fontFamily: 'system-ui',
-      fontSize: 'medium',
+      fontFamily: '"Cairo", "Noto Sans Arabic", sans-serif',
+      fontSize: 'small',
       direction: 'rtl',
 
       setTheme: (theme) => {
@@ -37,7 +37,32 @@ export const useSettingsStore = create<SettingsState>()(
         const direction = getDirection(language);
         document.documentElement.dir = direction;
         document.documentElement.lang = language;
-        set({ language, direction });
+        
+        // Apply language-specific defaults
+        const isArabic = language === 'ar';
+        const newFontFamily = isArabic 
+          ? '"Cairo", "Noto Sans Arabic", sans-serif' 
+          : 'Arial, Helvetica, sans-serif';
+        const newFontSize: 'small' | 'medium' | 'large' = 'small';
+        const newTheme: 'light' | 'dark' = 'dark';
+        
+        // Apply font family
+        document.body.style.fontFamily = newFontFamily;
+        
+        // Apply font size
+        const sizes = { small: '14px', medium: '16px', large: '18px' };
+        document.documentElement.style.fontSize = sizes[newFontSize];
+        
+        // Apply theme
+        document.documentElement.classList.toggle('dark', newTheme === 'dark');
+        
+        set({ 
+          language, 
+          direction, 
+          fontFamily: newFontFamily, 
+          fontSize: newFontSize,
+          theme: newTheme 
+        });
       },
 
       setFontFamily: (fontFamily) => {
@@ -57,7 +82,8 @@ export const useSettingsStore = create<SettingsState>()(
       },
 
       toggleLanguage: () => {
-        const newLanguage = get().language === 'ar' ? 'fr' : 'ar';
+        const currentLanguage = get().language;
+        const newLanguage = currentLanguage === 'ar' ? 'fr' : 'ar';
         get().setLanguage(newLanguage);
       },
     }),
@@ -65,16 +91,29 @@ export const useSettingsStore = create<SettingsState>()(
       name: 'settings-storage',
       onRehydrateStorage: () => (state) => {
         if (state) {
+          // Apply language-specific defaults
+          const isArabic = state.language === 'ar';
+          const defaultFontFamily = isArabic 
+            ? '"Cairo", "Noto Sans Arabic", sans-serif' 
+            : 'Arial, Helvetica, sans-serif';
+          const defaultFontSize: 'small' | 'medium' | 'large' = 'small';
+          const defaultTheme: 'light' | 'dark' = 'dark';
+          
           // Apply theme
-          document.documentElement.classList.toggle('dark', state.theme === 'dark');
+          document.documentElement.classList.toggle('dark', defaultTheme === 'dark');
           // Apply language
           i18n.changeLanguage(state.language);
           document.documentElement.dir = state.direction;
           document.documentElement.lang = state.language;
           // Apply font settings
-          document.body.style.fontFamily = state.fontFamily;
+          document.body.style.fontFamily = defaultFontFamily;
           const sizes = { small: '14px', medium: '16px', large: '18px' };
-          document.documentElement.style.fontSize = sizes[state.fontSize];
+          document.documentElement.style.fontSize = sizes[defaultFontSize];
+          
+          // Update state with defaults
+          state.fontFamily = defaultFontFamily;
+          state.fontSize = defaultFontSize;
+          state.theme = defaultTheme;
         }
       },
     }

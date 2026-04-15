@@ -37,7 +37,8 @@
     "all": "Tous",
     "menu": "Menu",
     "collapse": "Réduire",
-    "expand": "Développer"
+    "expand": "Développer",
+    "manage": "Gérer"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -146,7 +147,9 @@
     "editTrade": "Modifier le Métier",
     "nameAr": "Nom en Arabe",
     "nameFr": "Nom en Français",
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce métier ?"
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce métier ?",
+    "deleteTitle": "Confirmer la Suppression",
+    "deleteMessage": "Êtes-vous sûr de vouloir supprimer le métier '{{name}}' ? Cette action est irréversible."
   },
   "reports": {
     "title": "Rapports Financiers",
