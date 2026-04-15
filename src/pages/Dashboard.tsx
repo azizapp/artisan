@@ -83,10 +83,14 @@ function ActivityItem({ icon, iconBg, title, description, workers, time, badge, 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="font-medium text-foreground">{title}</p>
-            <p className="text-sm text-muted-foreground truncate">{description}</p>
-            <p className="text-xs text-muted-foreground mt-1">{workers} {workers === 1 ? 'عامل' : 'عمال'}</p>
-            <p className="text-xs text-muted-foreground mt-1">{time}</p>
+            <p className="text-sm text-muted-foreground truncate">
+              <span className="font-medium text-foreground">{title}</span>
+              <span className="mx-[10px]">|</span>
+              {description}
+              <span className="mx-[10px]">|</span>
+              <span className="text-xs font-medium text-primary">{workers} {workers === 1 ? 'عامل' : 'عمال'}</span>
+              {time && <><span className="mx-[10px]">|</span><span className="text-xs">{time}</span></>}
+            </p>
           </div>
           {badge && (
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${badgeColor}`}>
@@ -133,15 +137,20 @@ export function Dashboard() {
     { month: 'Dec', value: 9500 },
   ]);
 
-  // Weekly orders data for bar chart
-  const [weeklyData] = useState([
-    { day: 'Mon', orders: 45 },
-    { day: 'Tue', orders: 52 },
-    { day: 'Wed', orders: 38 },
-    { day: 'Thu', orders: 65 },
-    { day: 'Fri', orders: 78 },
-    { day: 'Sat', orders: 92 },
-    { day: 'Sun', orders: 58 },
+  // Monthly contributions data for bar chart
+  const [monthlyData, setMonthlyData] = useState([
+    { month: t('reports.jan'), contributions: 0 },
+    { month: t('reports.feb'), contributions: 0 },
+    { month: t('reports.mar'), contributions: 0 },
+    { month: t('reports.apr'), contributions: 0 },
+    { month: t('reports.may'), contributions: 0 },
+    { month: t('reports.jun'), contributions: 0 },
+    { month: t('reports.jul'), contributions: 0 },
+    { month: t('reports.aug'), contributions: 0 },
+    { month: t('reports.sep'), contributions: 0 },
+    { month: t('reports.oct'), contributions: 0 },
+    { month: t('reports.nov'), contributions: 0 },
+    { month: t('reports.dec'), contributions: 0 },
   ]);
 
   useEffect(() => {
@@ -174,7 +183,7 @@ export function Dashboard() {
     });
 
     // Update revenue data with actual data
-    const monthlyData = Array.from({ length: 12 }, (_, i) => {
+    const revenueMonthlyData = Array.from({ length: 12 }, (_, i) => {
       const monthRevenue = contributions
         .filter(c => {
           const date = new Date(c.payment_date);
@@ -183,10 +192,23 @@ export function Dashboard() {
         .reduce((sum, c) => sum + c.amount, 0);
       return {
         month: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i],
-        value: monthRevenue || Math.floor(Math.random() * 5000) + 3000,
+        value: monthRevenue,
       };
     });
-    setRevenueData(monthlyData);
+    setRevenueData(revenueMonthlyData);
+
+    // Update monthly contributions count data
+    const contributionsMonthlyData = Array.from({ length: 12 }, (_, i) => {
+      const monthContributions = contributions.filter(c => {
+        const date = new Date(c.payment_date);
+        return date.getMonth() === i && date.getFullYear() === currentYear;
+      }).length;
+      return {
+        month: [t('reports.jan'), t('reports.feb'), t('reports.mar'), t('reports.apr'), t('reports.may'), t('reports.jun'), t('reports.jul'), t('reports.aug'), t('reports.sep'), t('reports.oct'), t('reports.nov'), t('reports.dec')][i],
+        contributions: monthContributions,
+      };
+    });
+    setMonthlyData(contributionsMonthlyData);
   }, [artisans, contributions, expenses]);
 
   const statCards = [
@@ -318,18 +340,18 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Weekly Orders - Bar Chart */}
+        {/* Monthly Contributions - Bar Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>{t('dashboard.weeklyContributions')}</CardTitle>
+            <CardTitle>{t('dashboard.monthlyContributions')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyData}>
+                <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                   <XAxis 
-                    dataKey="day" 
+                    dataKey="month" 
                     stroke="hsl(var(--muted-foreground))" 
                     fontSize={12}
                     tickLine={false}
@@ -349,7 +371,7 @@ export function Dashboard() {
                     }}
                   />
                   <Bar 
-                    dataKey="orders" 
+                    dataKey="contributions" 
                     fill="#22c55e" 
                     radius={[4, 4, 0, 0]}
                   />
