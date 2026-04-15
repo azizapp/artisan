@@ -96,7 +96,7 @@
     "createdAt": "تاريخ الإنشاء",
     "updatedAt": "تاريخ التحديث",
     "confirmDelete": "هل أنت متأكد من حذف هذا الحرفي؟",
-    "searchPlaceholder": "البحث بالاسم أو رقم الهوية...",
+    "searchPlaceholder": "البحث بالاسم أو رقم المحل...",
     "totalArtisans": "إجمالي الحرفيين",
     "activeArtisans": "الحرفيون النشطون",
     "gZone": "منطقة G",

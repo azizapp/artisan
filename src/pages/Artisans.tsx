@@ -123,7 +123,8 @@ export function Artisans() {
   const filteredArtisans = artisans.filter(
     (artisan) =>
       artisan.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      artisan.national_id.includes(searchTerm)
+      artisan.national_id.includes(searchTerm) ||
+      artisan.shop_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const activeArtisans = artisans.filter(a => a.is_active).length;
