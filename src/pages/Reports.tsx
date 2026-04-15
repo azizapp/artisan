@@ -205,16 +205,41 @@ export function Reports() {
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="month" stroke="var(--text)" />
-                <YAxis stroke="var(--text)" tickFormatter={(value) => `${value / 1000}k`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis 
+                  dataKey="month" 
+                  stroke="hsl(var(--muted-foreground))" 
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))" 
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${value / 1000}k`}
+                />
                 <Tooltip
                   formatter={(value) => formatCurrency(Number(value))}
-                  contentStyle={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border)' }}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
                 />
-                <Legend />
-                <Bar dataKey="contributions" name={t('reports.contributions')} fill="#aa3bff" />
-                <Bar dataKey="expenses" name={t('reports.expenses')} fill="#ef4444" />
+                <Bar 
+                  dataKey="contributions" 
+                  name={t('reports.contributions')} 
+                  fill="#22c55e" 
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar 
+                  dataKey="expenses" 
+                  name={t('reports.expenses')} 
+                  fill="#ef4444" 
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
