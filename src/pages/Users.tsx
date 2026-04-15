@@ -185,26 +185,28 @@ export function Users() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header with Search and Add Button */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">
           {t('settings.userManagement')}
         </h1>
-        <Button onClick={() => openModal()}>
-          <Plus className="w-4 h-4" />
-          {t('user.addNew')}
-        </Button>
-      </div>
-
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        <Input
-          type="text"
-          placeholder={t('user.searchPlaceholder')}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+        <div className="flex items-center gap-3">
+          {/* Search - Small and next to add button */}
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={t('user.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-9 text-sm bg-transparent border border-border rounded-sm placeholder:text-muted-foreground"
+            />
+          </div>
+          <Button onClick={() => openModal()}>
+            <Plus className="w-4 h-4" />
+            {t('user.addNew')}
+          </Button>
+        </div>
       </div>
 
       {/* Users Table */}
@@ -346,7 +348,7 @@ export function Users() {
             <select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'user' })}
-              className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
+              className="w-full px-4 py-2 rounded-sm border border-input bg-transparent text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
               required
             >
               <option value="user">{t('user.user')}</option>

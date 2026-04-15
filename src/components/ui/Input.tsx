@@ -18,9 +18,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           className={cn(
-            'w-full px-4 py-2 rounded-lg border bg-[var(--bg)] text-[var(--text-h)]',
-            'border-[var(--border)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)]',
-            'transition-all outline-none',
+            'w-full px-4 py-2 rounded-sm border bg-transparent text-foreground',
+            'border-border focus:border-ring focus:ring-2 focus:ring-ring/20',
+            'transition-all outline-none placeholder:text-muted-foreground',
             error && 'border-red-500 focus:border-red-500 focus:ring-red-100',
             className
           )}

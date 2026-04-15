@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Edit2, Trash2, Calendar, Wallet, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Calendar, Wallet, Receipt, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { useContributionStore } from '../stores/contributionStore';
+import { useExpenseStore } from '../stores/expenseStore';
 import { useArtisanStore } from '../stores/artisanStore';
 import { formatCurrency, formatDate } from '../lib/utils';
 import type { Contribution, ContributionFormData } from '../types';
@@ -56,6 +57,7 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText,
 export function Contributions() {
   const { t } = useTranslation();
   const { contributions, fetchContributions, createContribution, updateContribution, deleteContribution } = useContributionStore();
+  const { expenses, fetchExpenses } = useExpenseStore();
   const { artisans, fetchArtisans } = useArtisanStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,6 +77,7 @@ export function Contributions() {
 
   useEffect(() => {
     fetchContributions();
+    fetchExpenses();
     fetchArtisans();
   }, []);
 
@@ -85,6 +88,7 @@ export function Contributions() {
   );
 
   const totalAmount = contributions.reduce((sum, c) => sum + c.amount, 0);
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,17 +147,6 @@ export function Contributions() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--text-h)]">
-          {t('contribution.title')}
-        </h1>
-        <Button onClick={() => openModal()}>
-          <Plus className="w-4 h-4" />
-          {t('contribution.addNew')}
-        </Button>
-      </div>
-
       {/* Stats Card */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
@@ -186,18 +179,45 @@ export function Contributions() {
             </div>
           </CardContent>
         </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-[var(--text)]">{t('dashboard.totalExpenses')}</p>
+                <p className="text-2xl font-bold text-red-500">
+                  {formatCurrency(totalExpenses)}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-red-500/10">
+                <Receipt className="w-6 h-6 text-red-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text)]" />
-        <Input
-          type="text"
-          placeholder={t('contribution.searchPlaceholder')}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      {/* Header with Search and Add Button */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">
+          {t('contribution.title')}
+        </h1>
+        <div className="flex items-center gap-3">
+          {/* Search - Small and next to add button */}
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={t('contribution.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-9 text-sm bg-transparent border border-border rounded-sm placeholder:text-muted-foreground"
+            />
+          </div>
+          <Button onClick={() => openModal()}>
+            <Plus className="w-4 h-4" />
+            {t('contribution.addNew')}
+          </Button>
+        </div>
       </div>
 
       {/* Contributions Table */}
@@ -205,65 +225,65 @@ export function Contributions() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[var(--border)]">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('contribution.artisan')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('contribution.occasion')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('contribution.amount')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('contribution.paymentDate')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('contribution.notes')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('common.actions')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {filteredContributions.map((contribution) => (
-                  <tr key={contribution.id} className="hover:bg-[var(--border)]/50">
+                  <tr key={contribution.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-[var(--text-h)]">
+                      <p className="font-medium text-foreground">
                         {contribution.artisan?.full_name}
                       </p>
-                      <p className="text-sm text-[var(--text)]">
+                      <p className="text-sm text-muted-foreground">
                         {contribution.artisan?.national_id}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-[var(--text)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {contribution.occasion}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="font-semibold text-[var(--accent)]">
+                      <span className="font-semibold text-primary">
                         {formatCurrency(contribution.amount)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[var(--text)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {formatDate(contribution.payment_date)}
                     </td>
-                    <td className="px-4 py-3 text-[var(--text)] max-w-xs truncate">
+                    <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">
                       {contribution.notes || '-'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => openModal(contribution)}
-                          className="p-2 rounded-lg hover:bg-[var(--border)] text-blue-500"
+                          className="p-2 rounded-lg hover:bg-muted text-blue-500"
                           title={t('common.edit')}
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openDeleteConfirm(contribution)}
-                          className="p-2 rounded-lg hover:bg-[var(--border)] text-red-500"
+                          className="p-2 rounded-lg hover:bg-muted text-red-500"
                           title={t('common.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -275,7 +295,7 @@ export function Contributions() {
               </tbody>
             </table>
             {filteredContributions.length === 0 && (
-              <p className="text-center text-[var(--text)] py-8">
+              <p className="text-center text-muted-foreground py-8">
                 {t('common.noData')}
               </p>
             )}
@@ -297,7 +317,7 @@ export function Contributions() {
             <select
               value={formData.artisan_id}
               onChange={(e) => setFormData({ ...formData, artisan_id: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)] outline-none"
+              className="w-full px-4 py-2 rounded-sm border border-border bg-transparent text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
               required
             >
               <option value="">{t('contribution.selectArtisan')}</option>
@@ -319,7 +339,7 @@ export function Contributions() {
               onChange={(e) => setFormData({ ...formData, occasion: e.target.value })}
               required
               placeholder={t('contribution.occasionPlaceholder')}
-              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)] outline-none"
+              className="w-full px-4 py-2 rounded-sm border border-border bg-transparent text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none placeholder:text-muted-foreground"
             />
             <datalist id="occasions-list">
               {Array.from(new Set(contributions.map(c => c.occasion))).filter(Boolean).map((occasion, index) => (

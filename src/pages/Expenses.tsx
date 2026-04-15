@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Edit2, Trash2, Receipt, Calendar, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Receipt, Calendar, Wallet, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { useExpenseStore } from '../stores/expenseStore';
+import { useContributionStore } from '../stores/contributionStore';
 import { formatCurrency, formatDate } from '../lib/utils';
 import type { Expense, ExpenseFormData } from '../types';
 
@@ -46,6 +47,7 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText,
 export function Expenses() {
   const { t } = useTranslation();
   const { expenses, fetchExpenses, createExpense, updateExpense, deleteExpense } = useExpenseStore();
+  const { contributions, fetchContributions } = useContributionStore();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,6 +65,7 @@ export function Expenses() {
 
   useEffect(() => {
     fetchExpenses();
+    fetchContributions();
   }, []);
 
   const filteredExpenses = expenses.filter(
@@ -72,6 +75,7 @@ export function Expenses() {
   );
 
   const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalContributions = contributions.reduce((sum, c) => sum + c.amount, 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,17 +132,6 @@ export function Expenses() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--text-h)]">
-          {t('expense.title')}
-        </h1>
-        <Button onClick={() => openModal()}>
-          <Plus className="w-4 h-4" />
-          {t('expense.addNew')}
-        </Button>
-      </div>
-
       {/* Stats Card */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
@@ -171,18 +164,45 @@ export function Expenses() {
             </div>
           </CardContent>
         </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-[var(--text)]">{t('dashboard.totalContributions')}</p>
+                <p className="text-2xl font-bold text-green-500">
+                  {formatCurrency(totalContributions)}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-green-500/10">
+                <Wallet className="w-6 h-6 text-green-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text)]" />
-        <Input
-          type="text"
-          placeholder={t('expense.searchPlaceholder')}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      {/* Header with Search and Add Button */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">
+          {t('expense.title')}
+        </h1>
+        <div className="flex items-center gap-3">
+          {/* Search - Small and next to add button */}
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={t('expense.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-9 text-sm bg-transparent border border-border rounded-sm placeholder:text-muted-foreground"
+            />
+          </div>
+          <Button onClick={() => openModal()}>
+            <Plus className="w-4 h-4" />
+            {t('expense.addNew')}
+          </Button>
+        </div>
       </div>
 
       {/* Expenses Table */}
@@ -190,30 +210,30 @@ export function Expenses() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[var(--border)]">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('expense.subject')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('expense.amount')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('expense.expenseDate')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('expense.notes')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-[var(--text-h)]">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('common.actions')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {filteredExpenses.map((expense) => (
-                  <tr key={expense.id} className="hover:bg-[var(--border)]/50">
+                  <tr key={expense.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-[var(--text-h)]">
+                      <p className="font-medium text-foreground">
                         {expense.subject}
                       </p>
                     </td>
@@ -222,24 +242,24 @@ export function Expenses() {
                         {formatCurrency(expense.amount)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[var(--text)]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {formatDate(expense.expense_date)}
                     </td>
-                    <td className="px-4 py-3 text-[var(--text)] max-w-xs truncate">
+                    <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">
                       {expense.notes || '-'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => openModal(expense)}
-                          className="p-2 rounded-lg hover:bg-[var(--border)] text-blue-500"
+                          className="p-2 rounded-lg hover:bg-muted text-blue-500"
                           title={t('common.edit')}
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openDeleteConfirm(expense)}
-                          className="p-2 rounded-lg hover:bg-[var(--border)] text-red-500"
+                          className="p-2 rounded-lg hover:bg-muted text-red-500"
                           title={t('common.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -251,7 +271,7 @@ export function Expenses() {
               </tbody>
             </table>
             {filteredExpenses.length === 0 && (
-              <p className="text-center text-[var(--text)] py-8">
+              <p className="text-center text-muted-foreground py-8">
                 {t('common.noData')}
               </p>
             )}
@@ -277,7 +297,7 @@ export function Expenses() {
               onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
               required
               placeholder={t('expense.subjectPlaceholder')}
-              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)] outline-none"
+              className="w-full px-4 py-2 rounded-sm border border-border bg-transparent text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none placeholder:text-muted-foreground"
             />
             <datalist id="subjects-list">
               {Array.from(new Set(expenses.map(e => e.subject))).filter(Boolean).map((subject, index) => (
@@ -310,7 +330,7 @@ export function Expenses() {
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)] outline-none resize-none"
+              className="w-full px-4 py-2 rounded-sm border border-border bg-transparent text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none resize-none placeholder:text-muted-foreground"
               rows={3}
               placeholder={t('expense.notesPlaceholder')}
             />

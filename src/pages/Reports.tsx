@@ -134,7 +134,7 @@ export function Reports() {
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] focus:border-[var(--accent)] outline-none"
+            className="px-4 py-2 rounded-sm border border-border bg-transparent text-foreground focus:border-ring outline-none"
           >
             {years.map(year => (
               <option key={year} value={year}>{year}</option>

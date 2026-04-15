@@ -194,7 +194,7 @@ export function Settings() {
               <select
                 value={fontFamily}
                 onChange={(e) => setFontFamily(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
+                className="w-full px-4 py-2 rounded-sm border border-input bg-transparent text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
               >
                 {fontOptions.map((font) => (
                   <option key={font.value} value={font.value}>

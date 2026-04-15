@@ -9,6 +9,7 @@ import {
   Briefcase,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { Modal } from '../components/ui/Modal';
 import { useArtisanStore } from '../stores/artisanStore';
 import { useContributionStore } from '../stores/contributionStore';
 import { useExpenseStore } from '../stores/expenseStore';
@@ -63,14 +64,19 @@ interface ActivityItemProps {
   iconBg: string;
   title: string;
   description: string;
+  workers: number;
   time: string;
   badge?: string;
   badgeColor?: string;
+  onClick?: () => void;
 }
 
-function ActivityItem({ icon, iconBg, title, description, time, badge, badgeColor }: ActivityItemProps) {
+function ActivityItem({ icon, iconBg, title, description, workers, time, badge, badgeColor, onClick }: ActivityItemProps) {
   return (
-    <div className="flex items-start gap-4 py-4 border-b border-border last:border-0">
+    <div 
+      className="flex items-start gap-4 py-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 transition-colors"
+      onClick={onClick}
+    >
       <div className={`p-2 rounded-full ${iconBg}`}>
         {icon}
       </div>
@@ -79,6 +85,7 @@ function ActivityItem({ icon, iconBg, title, description, time, badge, badgeColo
           <div>
             <p className="font-medium text-foreground">{title}</p>
             <p className="text-sm text-muted-foreground truncate">{description}</p>
+            <p className="text-xs text-muted-foreground mt-1">{workers} {workers === 1 ? 'عامل' : 'عمال'}</p>
             <p className="text-xs text-muted-foreground mt-1">{time}</p>
           </div>
           {badge && (
@@ -106,6 +113,9 @@ export function Dashboard() {
     monthly_revenue: 0,
     total_expenses: 0,
   });
+
+  // State for trade artisans modal
+  const [selectedTrade, setSelectedTrade] = useState<{ trade: typeof trades[0]; artisans: typeof artisans } | null>(null);
 
   // Monthly revenue data for area chart
   const [revenueData, setRevenueData] = useState([
@@ -214,13 +224,16 @@ export function Dashboard() {
     },
   ];
 
-  // Calculate trade statistics - count artisans per trade
+  // Calculate trade statistics - count artisans and workers per trade
   const tradeStats = useMemo(() => {
     const stats = trades.map((trade) => {
-      const count = artisans.filter((artisan) => artisan.trade_id === trade.id).length;
+      const tradeArtisans = artisans.filter((artisan) => artisan.trade_id === trade.id);
+      const count = tradeArtisans.length;
+      const workers = tradeArtisans.reduce((sum, artisan) => sum + (artisan.employee_count || 0), 0);
       return {
         trade,
         count,
+        workers,
       };
     }).filter((stat) => stat.count > 0) // Only show trades with artisans
       .sort((a, b) => b.count - a.count); // Sort by count descending
@@ -364,9 +377,14 @@ export function Dashboard() {
                     iconBg={colors.bg}
                     title={stat.trade.name_ar}
                     description={`${stat.count} ${stat.count === 1 ? t('artisan.title') : t('dashboard.totalArtisans')}`}
+                    workers={stat.workers}
                     time=""
                     badge={stat.trade.name_fr}
                     badgeColor={colors.badge}
+                    onClick={() => setSelectedTrade({ 
+                      trade: stat.trade, 
+                      artisans: artisans.filter(a => a.trade_id === stat.trade.id)
+                    })}
                   />
                 );
               })
@@ -376,6 +394,46 @@ export function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Trade Artisans Modal */}
+      <Modal
+        isOpen={!!selectedTrade}
+        onClose={() => setSelectedTrade(null)}
+        title={selectedTrade?.trade.name_ar || ''}
+      >
+        {selectedTrade && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t('dashboard.totalArtisans')}: {selectedTrade.artisans.length}</span>
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                {selectedTrade.trade.name_fr}
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="px-3 py-2 text-start text-sm font-medium text-muted-foreground">{t('artisan.fullName')}</th>
+                    <th className="px-3 py-2 text-start text-sm font-medium text-muted-foreground">{t('artisan.shopNumber')}</th>
+                    <th className="px-3 py-2 text-start text-sm font-medium text-muted-foreground">{t('artisan.area')}</th>
+                    <th className="px-3 py-2 text-center text-sm font-medium text-muted-foreground">{t('artisan.employeeCount')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {selectedTrade.artisans.map((artisan) => (
+                    <tr key={artisan.id} className="hover:bg-muted/50">
+                      <td className="px-3 py-2 text-foreground">{artisan.full_name}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{artisan.shop_number}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{artisan.area}</td>
+                      <td className="px-3 py-2 text-center text-muted-foreground">{artisan.employee_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

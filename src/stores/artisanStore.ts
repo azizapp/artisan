@@ -60,12 +60,17 @@ export const useArtisanStore = create<ArtisanState>((set, get) => ({
 
   createArtisan: async (data) => {
     try {
-      const { error } = await supabase.from('artisans').insert([{
+      const insertData: Record<string, unknown> = {
         ...data,
         documents: [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      }]);
+      };
+      // Remove undefined values
+      Object.keys(insertData).forEach(key => {
+        if (insertData[key] === undefined) delete insertData[key];
+      });
+      const { error } = await supabase.from('artisans').insert([insertData as any]);
 
       if (error) throw error;
       await get().fetchArtisans();
@@ -77,12 +82,17 @@ export const useArtisanStore = create<ArtisanState>((set, get) => ({
 
   updateArtisan: async (id, data) => {
     try {
+      const updateData: Record<string, unknown> = {
+        ...data,
+        updated_at: new Date().toISOString(),
+      };
+      // Remove undefined values
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) delete updateData[key];
+      });
       const { error } = await supabase
         .from('artisans')
-        .update({
-          ...data,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData as any)
         .eq('id', id);
 
       if (error) throw error;
