@@ -15,7 +15,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isLoading: false,
       isAuthenticated: false,
@@ -27,23 +27,20 @@ export const useAuthStore = create<AuthState>()(
       login: async (email, password) => {
         set({ isLoading: true });
         try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
+          // التحقق من المستخدم مباشرة من جدول users
+          const { data: userData, error } = await (supabase as any)
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .eq('password', password)
+            .eq('is_active', true)
+            .single();
 
-          if (error) throw error;
-
-          if (data.user) {
-            const { data: userData } = await supabase
-              .from('users')
-              .select('*')
-              .eq('id', data.user.id)
-              .single();
-
-            set({ user: userData, isAuthenticated: true });
+          if (error || !userData) {
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
           }
 
+          set({ user: userData as User, isAuthenticated: true });
           return { error: null };
         } catch (error) {
           return { error: error as Error };
@@ -53,23 +50,26 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        await supabase.auth.signOut();
         set({ user: null, isAuthenticated: false });
       },
 
       checkAuth: async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
+        // التحقق من الجلسة المحفوظة
+        const currentUser = get().user;
+        if (currentUser) {
+          // التحقق أن المستخدم لا يزال موجوداً ونشطاً
           const { data: userData } = await supabase
             .from('users')
             .select('*')
-            .eq('id', session.user.id)
+            .eq('id', currentUser.id)
+            .eq('is_active', true)
             .single();
 
-          set({ user: userData, isAuthenticated: true });
-        } else {
-          set({ user: null, isAuthenticated: false });
+          if (userData) {
+            set({ user: userData as User, isAuthenticated: true });
+          } else {
+            set({ user: null, isAuthenticated: false });
+          }
         }
       },
     }),
