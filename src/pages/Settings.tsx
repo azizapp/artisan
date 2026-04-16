@@ -9,7 +9,7 @@ import { Pagination } from '../components/ui/Pagination';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useTradeStore } from '../stores/tradeStore';
 import { useUserStore } from '../stores/userStore';
-import type { Trade, User } from '../types';
+import type { Trade, User, UserRole } from '../types';
 
 // Beautiful Arabic and French fonts
 const fontOptions = [
@@ -70,7 +70,7 @@ interface UserFormData {
   email: string;
   full_name: string;
   password: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'writer' | 'treasurer' | 'secretary' | 'consultant';
   is_active: boolean;
 }
 
@@ -108,7 +108,7 @@ export function Settings() {
     email: '',
     full_name: '',
     password: '',
-    role: 'user',
+    role: 'writer',
     is_active: true,
   });
   const [userDeleteConfirm, setUserDeleteConfirm] = useState<{ isOpen: boolean; user: User | null }>({
@@ -198,7 +198,7 @@ export function Settings() {
         email: user.email,
         full_name: user.full_name,
         password: '',
-        role: user.role as 'admin' | 'user',
+        role: user.role,
         is_active: user.is_active ?? true,
       });
     } else {
@@ -207,7 +207,7 @@ export function Settings() {
         email: '',
         full_name: '',
         password: '',
-        role: 'user',
+        role: 'writer',
         is_active: true,
       });
     }
@@ -579,7 +579,7 @@ export function Settings() {
                           ? 'bg-purple-500/10 text-purple-500'
                           : 'bg-blue-500/10 text-blue-500'
                       }`}>
-                        {user.role === 'admin' ? t('user.admin') : t('user.user')}
+                        {t(`user.${user.role}`)}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -683,11 +683,14 @@ export function Settings() {
             </label>
             <select
               value={userFormData.role}
-              onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value as 'admin' | 'user' })}
+              onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value as UserRole })}
               className="w-full px-4 py-2 rounded-sm border border-input bg-background text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
               required
             >
-              <option value="user">{t('user.user')}</option>
+              <option value="writer">{t('user.writer')}</option>
+              <option value="treasurer">{t('user.treasurer')}</option>
+              <option value="secretary">{t('user.secretary')}</option>
+              <option value="consultant">{t('user.consultant')}</option>
               <option value="admin">{t('user.admin')}</option>
             </select>
           </div>

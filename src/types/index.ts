@@ -1,9 +1,11 @@
 // User Types
+export type UserRole = 'admin' | 'writer' | 'treasurer' | 'secretary' | 'consultant';
+
 export interface User {
   id: string;
   email: string;
   full_name: string;
-  role: string;
+  role: UserRole;
   is_active?: boolean;
   created_at: string;
 }

@@ -8,13 +8,13 @@ import { Modal } from '../components/ui/Modal';
 import { Pagination } from '../components/ui/Pagination';
 import { useUserStore } from '../stores/userStore';
 import { formatDate } from '../lib/utils';
-import type { User } from '../types';
+import type { User, UserRole } from '../types';
 
 interface UserFormData {
   email: string;
   full_name: string;
   password: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'writer' | 'treasurer' | 'secretary' | 'consultant';
   is_active: boolean;
 }
 
@@ -75,7 +75,7 @@ export function Users() {
     email: '',
     full_name: '',
     password: '',
-    role: 'user',
+    role: 'writer',
     is_active: true,
   });
 
@@ -139,7 +139,7 @@ export function Users() {
         email: user.email,
         full_name: user.full_name,
         password: '',
-        role: user.role as 'admin' | 'user',
+        role: user.role,
         is_active: user.is_active ?? true,
       });
     } else {
@@ -148,7 +148,7 @@ export function Users() {
         email: '',
         full_name: '',
         password: '',
-        role: 'user',
+        role: 'writer',
         is_active: true,
       });
     }
@@ -268,7 +268,7 @@ export function Users() {
                           ? 'bg-purple-500/10 text-purple-500'
                           : 'bg-blue-500/10 text-blue-500'
                       }`}>
-                        {user.role === 'admin' ? t('user.admin') : t('user.user')}
+                        {t(`user.${user.role}`)}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -364,11 +364,14 @@ export function Users() {
             </label>
             <select
               value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'user' })}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
               className="w-full px-4 py-2 rounded-sm border border-input bg-background text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
               required
             >
-              <option value="user">{t('user.user')}</option>
+              <option value="writer">{t('user.writer')}</option>
+              <option value="treasurer">{t('user.treasurer')}</option>
+              <option value="secretary">{t('user.secretary')}</option>
+              <option value="consultant">{t('user.consultant')}</option>
               <option value="admin">{t('user.admin')}</option>
             </select>
           </div>

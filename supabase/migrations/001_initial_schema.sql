@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT UNIQUE NOT NULL,
   full_name TEXT NOT NULL,
-  role TEXT DEFAULT 'user' CHECK (role IN ('admin', 'user')),
+  role TEXT DEFAULT 'writer' CHECK (role IN ('admin', 'writer', 'treasurer', 'secretary', 'consultant')),
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -90,36 +90,46 @@ CREATE POLICY "Users can view all users" ON users
 CREATE POLICY "Users can update own profile" ON users
   FOR UPDATE USING (auth.uid() = id);
 
--- RLS Policies for trades
-CREATE POLICY "Anyone can view trades" ON trades
-  FOR SELECT USING (true);
-
-CREATE POLICY "Only admins can modify trades" ON trades
-  FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
-
--- RLS Policies for artisans
-CREATE POLICY "Anyone can view artisans" ON artisans
-  FOR SELECT USING (true);
-
-CREATE POLICY "Admins can insert artisans" ON artisans
+CREATE POLICY "Only admins can insert users" ON users
   FOR INSERT WITH CHECK (
     EXISTS (
       SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'
     )
   );
 
-CREATE POLICY "Admins can update artisans" ON artisans
-  FOR UPDATE USING (
+CREATE POLICY "Only admins can delete users" ON users
+  FOR DELETE USING (
     EXISTS (
       SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'
     )
   );
 
-CREATE POLICY "Admins can delete artisans" ON artisans
+-- RLS Policies for trades
+CREATE POLICY "Anyone can view trades" ON trades
+  FOR SELECT USING (true);
+
+CREATE POLICY "Authenticated users can modify trades" ON trades
+  FOR ALL USING (auth.uid() IS NOT NULL);
+
+-- RLS Policies for artisans
+CREATE POLICY "Anyone can view artisans" ON artisans
+  FOR SELECT USING (true);
+
+CREATE POLICY "Secretary and Consultant can insert artisans" ON artisans
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('secretary', 'consultant', 'admin')
+    )
+  );
+
+CREATE POLICY "Secretary and Consultant can update artisans" ON artisans
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('secretary', 'consultant', 'admin')
+    )
+  );
+
+CREATE POLICY "Only admins can delete artisans" ON artisans
   FOR DELETE USING (
     EXISTS (
       SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'
@@ -130,10 +140,10 @@ CREATE POLICY "Admins can delete artisans" ON artisans
 CREATE POLICY "Anyone can view contributions" ON contributions
   FOR SELECT USING (true);
 
-CREATE POLICY "Only admins can modify contributions" ON contributions
+CREATE POLICY "Writer and Treasurer can modify contributions" ON contributions
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'
+      SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('writer', 'treasurer', 'admin')
     )
   );
 
@@ -141,10 +151,10 @@ CREATE POLICY "Only admins can modify contributions" ON contributions
 CREATE POLICY "Anyone can view expenses" ON expenses
   FOR SELECT USING (true);
 
-CREATE POLICY "Only admins can modify expenses" ON expenses
+CREATE POLICY "Writer and Treasurer can modify expenses" ON expenses
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'
+      SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('writer', 'treasurer', 'admin')
     )
   );
 
