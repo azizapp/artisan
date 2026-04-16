@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { Card, CardContent, CardHeader } from '../components/ui/Card';
 
 export function Login() {
   const { t } = useTranslation();
@@ -32,7 +32,7 @@ export function Login() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">{t('app.name')}</CardTitle>
+          <img src="/logo.png" alt="ArtisanManager" className="w-48 h-48 mx-auto mb-4 rounded-full object-cover" />
           <p className="text-[var(--text)] mt-2">{t('app.tagline')}</p>
         </CardHeader>
         <CardContent>

@@ -109,7 +109,8 @@
     "deleteMessage": "Êtes-vous sûr de vouloir supprimer l'artisan \"{{name}}\" ? Cette action est irréversible.",
     "deactivateTitle": "Confirmer la Désactivation",
     "deactivateMessage": "Êtes-vous sûr de vouloir désactiver l'artisan \"{{name}}\" ?",
-    "deactivate": "Désactiver"
+    "deactivate": "Désactiver",
+    "viewDetails": "Voir les détails"
   },
   "contribution": {
     "title": "Contributions",
@@ -237,5 +238,7 @@
     "maxLength": "Ne doit pas dépasser {{count}} caractères",
     "positiveNumber": "Doit être un nombre positif",
     "invalidDate": "Date invalide"
-  }
+  },
+  "call": "Appeler",
+  "whatsapp": "WhatsApp"
 }

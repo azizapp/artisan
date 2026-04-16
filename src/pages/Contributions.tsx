@@ -215,7 +215,7 @@ export function Contributions() {
 
       {/* Header with Search and Add Button */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-2xl font-bold text-foreground hidden md:block">
           {t('contribution.title')}
         </h1>
         <div className="flex items-center gap-3">
@@ -247,16 +247,16 @@ export function Contributions() {
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('contribution.artisan')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground hidden md:table-cell">
                     {t('contribution.occasion')}
                   </th>
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('contribution.amount')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground hidden md:table-cell">
                     {t('contribution.paymentDate')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground hidden md:table-cell">
                     {t('contribution.notes')}
                   </th>
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
@@ -271,11 +271,11 @@ export function Contributions() {
                       <p className="font-medium text-foreground">
                         {contribution.artisan?.full_name}
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        {contribution.artisan?.national_id}
+                      <p className="text-sm text-muted-foreground md:hidden">
+                        {contribution.occasion}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
                       {contribution.occasion}
                     </td>
                     <td className="px-4 py-3">
@@ -283,10 +283,10 @@ export function Contributions() {
                         {formatCurrency(contribution.amount)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
                       {formatDate(contribution.payment_date)}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">
+                    <td className="px-4 py-3 text-muted-foreground max-w-xs truncate hidden md:table-cell">
                       {contribution.notes || '-'}
                     </td>
                     <td className="px-4 py-3">

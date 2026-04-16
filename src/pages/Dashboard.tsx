@@ -286,8 +286,8 @@ export function Dashboard() {
         ))}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Charts Row - مخفي على الهاتف */}
+      <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Overview - Area Chart */}
         <Card className="lg:col-span-2">
           <CardHeader>

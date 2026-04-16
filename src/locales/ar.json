@@ -109,7 +109,8 @@
     "deleteMessage": "هل أنت متأكد من حذف الحرفي \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
     "deactivateTitle": "تأكيد إلغاء التفعيل",
     "deactivateMessage": "هل أنت متأكد من إلغاء تفعيل الحرفي \"{{name}}\"؟",
-    "deactivate": "إلغاء التفعيل"
+    "deactivate": "إلغاء التفعيل",
+    "viewDetails": "عرض التفاصيل"
   },
   "contribution": {
     "title": "المساهمات",
@@ -237,5 +238,7 @@
     "maxLength": "يجب أن لا يتجاوز {{count}} أحرف",
     "positiveNumber": "يجب أن يكون رقماً موجباً",
     "invalidDate": "تاريخ غير صالح"
-  }
+  },
+  "call": "اتصال",
+  "whatsapp": "واتساب"
 }
