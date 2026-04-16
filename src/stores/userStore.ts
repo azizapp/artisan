@@ -47,11 +47,11 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       // استخدام دالة RPC لتجاوز مشاكل auth.signUp
       const { data: userId, error: rpcError } = await (supabase as any).rpc('create_new_user', {
-        user_email: data.email,
-        user_full_name: data.full_name,
-        user_password: data.password,
-        user_role: data.role,
-        user_is_active: data.is_active,
+        p_email: data.email,
+        p_full_name: data.full_name,
+        p_password: data.password,
+        p_role: data.role,
+        p_is_active: data.is_active,
       });
 
       if (rpcError) throw rpcError;
