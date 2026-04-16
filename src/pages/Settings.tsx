@@ -8,6 +8,7 @@ import { Modal } from '../components/ui/Modal';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useTradeStore } from '../stores/tradeStore';
 import { useUserStore } from '../stores/userStore';
+import { formatDate } from '../lib/utils';
 import type { Trade, User, UserRole } from '../types';
 
 // Beautiful Arabic and French fonts
@@ -543,6 +544,9 @@ export function Settings() {
                     {t('common.status')}
                   </th>
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
+                    {t('common.createdAt')}
+                  </th>
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('common.actions')}
                   </th>
                 </tr>
@@ -586,6 +590,9 @@ export function Settings() {
                           </>
                         )}
                       </button>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {formatDate(user.created_at)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
