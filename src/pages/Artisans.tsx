@@ -8,7 +8,7 @@ import { Modal } from '../components/ui/Modal';
 import { Pagination } from '../components/ui/Pagination';
 import { useArtisanStore } from '../stores/artisanStore';
 import { useTradeStore } from '../stores/tradeStore';
-import type { Artisan, ArtisanFormData } from '../types';
+import type { Artisan, ArtisanFormData, TradeFormData } from '../types';
 
 interface StatCardProps {
   title: string;
@@ -84,10 +84,12 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText,
 export function Artisans() {
   const { t } = useTranslation();
   const { artisans, fetchArtisans, createArtisan, updateArtisan, deleteArtisan, toggleArtisanStatus } = useArtisanStore();
-  const { trades, fetchTrades } = useTradeStore();
+  const { trades, fetchTrades, createTrade } = useTradeStore();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
+  const [tradeFormData, setTradeFormData] = useState<TradeFormData>({ name_ar: '', name_fr: '' });
   const [editingArtisan, setEditingArtisan] = useState<Artisan | null>(null);
   const [formData, setFormData] = useState<ArtisanFormData>({
     full_name: '',
@@ -236,6 +238,13 @@ export function Artisans() {
     }
   };
 
+  const handleTradeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await createTrade(tradeFormData);
+    setTradeFormData({ name_ar: '', name_fr: '' });
+    setIsTradeModalOpen(false);
+  };
+
   const statCards = [
     {
       title: t('artisan.totalArtisans'),
@@ -292,6 +301,10 @@ export function Artisans() {
           <Button onClick={() => openModal()} className="rounded-sm">
             <Plus className="w-4 h-4" />
             {t('artisan.addNew')}
+          </Button>
+          <Button onClick={() => setIsTradeModalOpen(true)} variant="secondary" className="rounded-sm">
+            <Plus className="w-4 h-4" />
+            {t('trade.addNew')}
           </Button>
         </div>
       </div>
@@ -618,6 +631,36 @@ export function Artisans() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Add Trade Modal */}
+      <Modal
+        isOpen={isTradeModalOpen}
+        onClose={() => setIsTradeModalOpen(false)}
+        title={t('trade.addNew')}
+      >
+        <form onSubmit={handleTradeSubmit} className="space-y-4">
+          <Input
+            label={t('trade.nameAr')}
+            value={tradeFormData.name_ar}
+            onChange={(e) => setTradeFormData({ ...tradeFormData, name_ar: e.target.value })}
+            required
+          />
+          <Input
+            label={t('trade.nameFr')}
+            value={tradeFormData.name_fr}
+            onChange={(e) => setTradeFormData({ ...tradeFormData, name_fr: e.target.value })}
+            required
+          />
+          <div className="flex gap-3 pt-4">
+            <Button type="submit" className="flex-1">
+              {t('common.save')}
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => setIsTradeModalOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+          </div>
+        </form>
       </Modal>
     </div>
   );
