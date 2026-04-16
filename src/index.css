@@ -156,3 +156,25 @@ h1, h2, h3, h4, h5, h6 {
 .dark .glass {
   background: rgba(15, 23, 42, 0.7);
 }
+
+/* Select dropdown styling for dark mode */
+select {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+
+select option {
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+}
+
+.dark select {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.dark select option {
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+}

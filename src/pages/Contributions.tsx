@@ -347,7 +347,7 @@ export function Contributions() {
             <select
               value={formData.artisan_id}
               onChange={(e) => setFormData({ ...formData, artisan_id: e.target.value })}
-              className="w-full px-4 py-2 rounded-sm border border-border bg-transparent text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
+              className="w-full px-4 py-2 rounded-sm border border-border bg-background text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
               required
             >
               <option value="">{t('contribution.selectArtisan')}</option>

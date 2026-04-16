@@ -455,7 +455,7 @@ export function Artisans() {
               <select
                 value={formData.area}
                 onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                className="w-full px-4 py-2 rounded-sm border border-input bg-transparent text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
+                className="w-full px-4 py-2 rounded-sm border border-input bg-background text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
                 required
               >
                 <option value="">{t('common.select')}</option>
