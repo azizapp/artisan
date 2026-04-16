@@ -120,10 +120,6 @@ export function Settings() {
     user: null,
   });
 
-  // Pagination state for trades
-  const [tradesCurrentPage, setTradesCurrentPage] = useState(1);
-  const [tradesPageSize, setTradesPageSize] = useState(10);
-
   // Pagination state for users
   const [usersCurrentPage, setUsersCurrentPage] = useState(1);
   const [usersPageSize, setUsersPageSize] = useState(10);
@@ -132,13 +128,6 @@ export function Settings() {
     fetchTrades();
     fetchUsers();
   }, []);
-
-  // Reset trades pagination when modal opens
-  useEffect(() => {
-    if (isTradesSectionOpen) {
-      setTradesCurrentPage(1);
-    }
-  }, [isTradesSectionOpen]);
 
   // Reset users pagination when search changes
   useEffect(() => {
@@ -187,13 +176,6 @@ export function Settings() {
       closeTradeDeleteConfirm();
     }
   };
-
-  // Trades pagination calculations
-  const tradesTotalPages = Math.ceil(trades.length / tradesPageSize);
-  const paginatedTrades = trades.slice(
-    (tradesCurrentPage - 1) * tradesPageSize,
-    tradesCurrentPage * tradesPageSize
-  );
 
   // User handlers
   const filteredUsers = users.filter(
@@ -505,7 +487,7 @@ export function Settings() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {paginatedTrades.map((trade) => (
+                {trades.map((trade) => (
                   <tr key={trade.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3 text-foreground">{trade.name_ar}</td>
                     <td className="px-4 py-3 text-muted-foreground">{trade.name_fr}</td>
@@ -535,19 +517,6 @@ export function Settings() {
               <p className="text-center text-muted-foreground py-8">{t('common.noData')}</p>
             )}
           </div>
-          {trades.length > 0 && (
-            <Pagination
-              currentPage={tradesCurrentPage}
-              totalPages={tradesTotalPages}
-              pageSize={tradesPageSize}
-              onPageChange={setTradesCurrentPage}
-              onPageSizeChange={(size) => {
-                setTradesPageSize(size);
-                setTradesCurrentPage(1);
-              }}
-              totalItems={trades.length}
-            />
-          )}
         </div>
       </Modal>
 
