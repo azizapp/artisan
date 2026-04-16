@@ -5,7 +5,6 @@ import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
-import { Pagination } from '../components/ui/Pagination';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useTradeStore } from '../stores/tradeStore';
 import { useUserStore } from '../stores/userStore';
@@ -120,19 +119,10 @@ export function Settings() {
     user: null,
   });
 
-  // Pagination state for users
-  const [usersCurrentPage, setUsersCurrentPage] = useState(1);
-  const [usersPageSize, setUsersPageSize] = useState(10);
-
   useEffect(() => {
     fetchTrades();
     fetchUsers();
   }, []);
-
-  // Reset users pagination when search changes
-  useEffect(() => {
-    setUsersCurrentPage(1);
-  }, [userSearchTerm]);
 
   // Trade handlers
   const openTradeModal = (trade?: Trade) => {
@@ -182,13 +172,6 @@ export function Settings() {
     (user) =>
       user.full_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(userSearchTerm.toLowerCase())
-  );
-
-  // Users pagination calculations
-  const usersTotalPages = Math.ceil(filteredUsers.length / usersPageSize);
-  const paginatedUsers = filteredUsers.slice(
-    (usersCurrentPage - 1) * usersPageSize,
-    usersCurrentPage * usersPageSize
   );
 
   const openUserModal = (user?: User) => {
@@ -565,7 +548,7 @@ export function Settings() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {paginatedUsers.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3">
                       <p className="font-medium text-foreground">{user.email}</p>
@@ -630,19 +613,6 @@ export function Settings() {
               <p className="text-center text-muted-foreground py-8">{t('common.noData')}</p>
             )}
           </div>
-          {filteredUsers.length > 0 && (
-            <Pagination
-              currentPage={usersCurrentPage}
-              totalPages={usersTotalPages}
-              pageSize={usersPageSize}
-              onPageChange={setUsersCurrentPage}
-              onPageSizeChange={(size) => {
-                setUsersPageSize(size);
-                setUsersCurrentPage(1);
-              }}
-              totalItems={filteredUsers.length}
-            />
-          )}
         </div>
       </Modal>
 
