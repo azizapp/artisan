@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:tsc": "npx tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "npx vite",
+    "build": "npx vite build",
+    "build:tsc": "npx tsc -b && npx vite build",
+    "lint": "npx eslint .",
+    "preview": "npx vite preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
