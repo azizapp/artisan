@@ -49,6 +49,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       const { data: userId, error: rpcError } = await (supabase as any).rpc('create_new_user', {
         user_email: data.email,
         user_full_name: data.full_name,
+        user_password: data.password,
         user_role: data.role,
         user_is_active: data.is_active,
       });

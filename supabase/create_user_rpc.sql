@@ -4,6 +4,7 @@
 CREATE OR REPLACE FUNCTION public.create_new_user(
   user_email TEXT,
   user_full_name TEXT,
+  user_password TEXT,
   user_role TEXT DEFAULT 'writer',
   user_is_active BOOLEAN DEFAULT true
 )
@@ -18,8 +19,8 @@ BEGIN
   new_user_id := gen_random_uuid();
   
   -- إضافة المستخدم في جدول users
-  INSERT INTO public.users (id, email, full_name, role, is_active, created_at)
-  VALUES (new_user_id, user_email, user_full_name, user_role, user_is_active, NOW())
+  INSERT INTO public.users (id, email, full_name, password, role, is_active, created_at)
+  VALUES (new_user_id, user_email, user_full_name, user_password, user_role, user_is_active, NOW())
   ON CONFLICT (email) DO NOTHING
   RETURNING id INTO new_user_id;
   
@@ -33,8 +34,8 @@ END;
 $$;
 
 -- إعطاء صلاحية التنفيذ للجميع
-GRANT EXECUTE ON FUNCTION public.create_new_user(TEXT, TEXT, TEXT, BOOLEAN) TO anon;
-GRANT EXECUTE ON FUNCTION public.create_new_user(TEXT, TEXT, TEXT, BOOLEAN) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.create_new_user(TEXT, TEXT, TEXT, TEXT, BOOLEAN) TO anon;
+GRANT EXECUTE ON FUNCTION public.create_new_user(TEXT, TEXT, TEXT, TEXT, BOOLEAN) TO authenticated;
 
 -- مثال للاستخدام:
--- SELECT public.create_new_user('test@example.com', 'اسم المستخدم', 'admin', true);
+-- SELECT public.create_new_user('test@example.com', 'اسم المستخدم', 'password123', 'admin', true);
