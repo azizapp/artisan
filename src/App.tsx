@@ -42,6 +42,24 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <Layout>{children}</Layout>;
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user, checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Layout>{children}</Layout>;
+}
+
 function App() {
   const { checkAuth } = useAuthStore();
   useSettingsStore(); // Initialize settings
@@ -98,9 +116,9 @@ function App() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <SettingsPage />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route

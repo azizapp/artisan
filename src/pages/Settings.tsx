@@ -628,6 +628,7 @@ export function Settings() {
         isOpen={isUserModalOpen}
         onClose={closeUserModal}
         title={editingUser ? t('user.editUser') : t('user.addNew')}
+        className="max-w-[52rem]"
       >
         <form onSubmit={handleUserSubmit} className="space-y-4">
           <Input

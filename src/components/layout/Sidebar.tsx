@@ -18,18 +18,20 @@ import { useAuthStore } from '../../stores/authStore';
 
 export function Sidebar() {
   const { t } = useTranslation();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const navItems = [
+  const allNavItems = [
     { path: '/', icon: LayoutDashboard, label: t('nav.dashboard') },
     { path: '/artisans', icon: Users, label: t('nav.artisans') },
     { path: '/contributions', icon: Wallet, label: t('nav.contributions') },
     { path: '/expenses', icon: Receipt, label: t('nav.expenses') },
     { path: '/reports', icon: BarChart3, label: t('nav.reports') },
-    { path: '/settings', icon: Settings, label: t('nav.settings') },
+    { path: '/settings', icon: Settings, label: t('nav.settings'), adminOnly: true },
   ];
+
+  const navItems = allNavItems.filter(item => !item.adminOnly || user?.role === 'admin');
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
