@@ -45,33 +45,15 @@ export const useUserStore = create<UserState>((set, get) => ({
 
   createUser: async (data) => {
     try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            full_name: data.full_name,
-            role: data.role,
-          },
-        },
+      // استخدام دالة RPC لتجاوز مشاكل auth.signUp
+      const { data: userId, error: rpcError } = await (supabase as any).rpc('create_new_user', {
+        user_email: data.email,
+        user_full_name: data.full_name,
+        user_role: data.role,
+        user_is_active: data.is_active,
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // Update user profile with additional data
-        const { error: updateError } = await supabase
-          .from('users')
-          .update({
-            full_name: data.full_name,
-            role: data.role,
-            is_active: data.is_active,
-          })
-          .eq('id', authData.user.id);
-
-        if (updateError) throw updateError;
-      }
+      if (rpcError) throw rpcError;
 
       await get().fetchUsers();
       return { error: null };

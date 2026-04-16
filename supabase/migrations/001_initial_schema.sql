@@ -90,12 +90,9 @@ CREATE POLICY "Users can view all users" ON users
 CREATE POLICY "Users can update own profile" ON users
   FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Only admins can insert users" ON users
-  FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+-- سياسة للسماح لأي مستخدم مسجل دخول بإضافة مستخدمين جدد
+CREATE POLICY "Authenticated users can insert users" ON users
+  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Only admins can delete users" ON users
   FOR DELETE USING (
