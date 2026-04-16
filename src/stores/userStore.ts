@@ -6,7 +6,7 @@ interface UserFormData {
   email: string;
   full_name: string;
   password: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'writer' | 'treasurer' | 'secretary' | 'consultant';
   is_active: boolean;
 }
 
@@ -35,7 +35,7 @@ export const useUserStore = create<UserState>((set, get) => ({
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      set({ users: data || [] });
+      set({ users: (data || []) as User[] });
     } catch (error) {
       set({ error: (error as Error).message });
     } finally {
