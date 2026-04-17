@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Pagination } from '../components/ui/Pagination';
+import { DateRangeFilter } from '../components/ui/DateRangeFilter';
 import { useContributionStore } from '../stores/contributionStore';
 import { useExpenseStore } from '../stores/expenseStore';
 import { useArtisanStore } from '../stores/artisanStore';
@@ -80,6 +81,10 @@ export function Contributions() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  // Date range filter state
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
   useEffect(() => {
     fetchContributions();
     fetchExpenses();
@@ -89,13 +94,19 @@ export function Contributions() {
   // Reset to first page when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, startDate, endDate]);
 
   const filteredContributions = contributions.filter(
     (contribution) =>
       contribution.artisan?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contribution.occasion.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).filter((contribution) => {
+    if (!startDate && !endDate) return true;
+    const createdDate = contribution.created_at.split('T')[0];
+    if (startDate && createdDate < startDate) return false;
+    if (endDate && createdDate > endDate) return false;
+    return true;
+  });
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredContributions.length / pageSize);
@@ -218,7 +229,14 @@ export function Contributions() {
         <h1 className="text-2xl font-bold text-foreground hidden md:block">
           {t('contribution.title')}
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <DateRangeFilter
+            startDate={startDate}
+            endDate={endDate}
+            onStartChange={setStartDate}
+            onEndChange={setEndDate}
+            onClear={() => { setStartDate(''); setEndDate(''); }}
+          />
           {/* Search - Small and next to add button */}
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
