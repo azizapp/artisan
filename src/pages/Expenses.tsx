@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Pagination } from '../components/ui/Pagination';
+import { DatePresetFilter, getDateRangeFromPreset } from '../components/ui/DatePresetFilter';
 import { useExpenseStore } from '../stores/expenseStore';
 import { useContributionStore } from '../stores/contributionStore';
 import { formatCurrency, formatDate } from '../lib/utils';
@@ -68,6 +69,9 @@ export function Expenses() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  // Date preset filter state
+  const [datePreset, setDatePreset] = useState('all');
+
   useEffect(() => {
     fetchExpenses();
     fetchContributions();
@@ -76,13 +80,20 @@ export function Expenses() {
   // Reset to first page when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, datePreset]);
 
   const filteredExpenses = expenses.filter(
     (expense) =>
       expense.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (expense.notes && expense.notes.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ).filter((expense) => {
+    const { startDate, endDate } = getDateRangeFromPreset(datePreset);
+    if (!startDate && !endDate) return true;
+    const createdDate = new Date(expense.created_at).toISOString().split('T')[0];
+    if (startDate && createdDate < startDate) return false;
+    if (endDate && createdDate > endDate) return false;
+    return true;
+  });
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredExpenses.length / pageSize);
@@ -200,10 +211,14 @@ export function Expenses() {
 
       {/* Header with Search and Add Button */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-2xl font-bold text-foreground hidden md:block">
           {t('expense.title')}
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <DatePresetFilter
+            value={datePreset}
+            onChange={setDatePreset}
+          />
           {/* Search - Small and next to add button */}
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -215,9 +230,9 @@ export function Expenses() {
               className="pl-9 h-9 text-sm bg-transparent border border-border rounded-sm placeholder:text-muted-foreground"
             />
           </div>
-          <Button onClick={() => openModal()}>
-            <Plus className="w-4 h-4" />
-            {t('expense.addNew')}
+          <Button onClick={() => openModal()} className="md:py-2 md:px-4 py-1.5 px-2.5 text-sm md:text-base">
+            <Plus className="w-4 h-4 md:mr-1" />
+            <span className="hidden md:inline">{t('expense.addNew')}</span>
           </Button>
         </div>
       </div>
@@ -235,10 +250,10 @@ export function Expenses() {
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('expense.amount')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground hidden md:table-cell">
                     {t('expense.expenseDate')}
                   </th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground hidden md:table-cell">
                     {t('expense.notes')}
                   </th>
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
@@ -253,16 +268,19 @@ export function Expenses() {
                       <p className="font-medium text-foreground">
                         {expense.subject}
                       </p>
+                      <p className="text-sm text-muted-foreground md:hidden">
+                        {formatDate(expense.expense_date)}
+                      </p>
                     </td>
                     <td className="px-4 py-3">
                       <span className="font-semibold text-red-500">
                         {formatCurrency(expense.amount)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
                       {formatDate(expense.expense_date)}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">
+                    <td className="px-4 py-3 text-muted-foreground max-w-xs truncate hidden md:table-cell">
                       {expense.notes || '-'}
                     </td>
                     <td className="px-4 py-3">

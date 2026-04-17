@@ -41,7 +41,10 @@
     "manage": "Gérer",
     "show": "Afficher",
     "of": "sur",
-    "items": "éléments"
+    "items": "éléments",
+    "startDate": "Date début",
+    "endDate": "Date fin",
+    "clearFilter": "Effacer le filtre"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -240,5 +243,18 @@
     "invalidDate": "Date invalide"
   },
   "call": "Appeler",
-  "whatsapp": "WhatsApp"
+  "whatsapp": "WhatsApp",
+  "datePresets": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "thisWeek": "Cette semaine",
+    "thisMonth": "Ce mois",
+    "lastMonth": "Mois dernier",
+    "firstQuarter": "Premier trimestre",
+    "secondQuarter": "Deuxième trimestre",
+    "sixMonths": "Six mois",
+    "thisYear": "Cette année",
+    "lastYear": "Année dernière",
+    "all": "Tout"
+  }
 }

@@ -94,7 +94,7 @@ export function MobileArtisans() {
                 <span className="text-sm text-muted-foreground">{artisan.shop_number} - {artisan.area}</span>
                 <span className={`text-xs px-2 py-1 rounded-full ${
                   artisan.is_active
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-orange-500 text-white dark:bg-orange-900/30 dark:text-orange-400'
                     : 'bg-red-100 text-red-700'
                 }`}>
                   {artisan.is_active ? t('common.active') : t('common.inactive')}
@@ -253,7 +253,7 @@ export function MobileArtisans() {
                 <p className="text-sm text-muted-foreground">{t('common.status')}</p>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   viewModal.artisan.is_active
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    ? 'bg-orange-500 text-white dark:bg-orange-900/30 dark:text-orange-400'
                     : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                 }`}>
                   {viewModal.artisan.is_active ? t('common.active') : t('common.inactive')}

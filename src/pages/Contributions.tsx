@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Pagination } from '../components/ui/Pagination';
-import { DateRangeFilter } from '../components/ui/DateRangeFilter';
+import { DatePresetFilter, getDateRangeFromPreset } from '../components/ui/DatePresetFilter';
 import { useContributionStore } from '../stores/contributionStore';
 import { useExpenseStore } from '../stores/expenseStore';
 import { useArtisanStore } from '../stores/artisanStore';
@@ -81,9 +81,8 @@ export function Contributions() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Date range filter state
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  // Date preset filter state
+  const [datePreset, setDatePreset] = useState('all');
 
   useEffect(() => {
     fetchContributions();
@@ -94,15 +93,16 @@ export function Contributions() {
   // Reset to first page when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, startDate, endDate]);
+  }, [searchTerm, datePreset]);
 
   const filteredContributions = contributions.filter(
     (contribution) =>
       contribution.artisan?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contribution.occasion.toLowerCase().includes(searchTerm.toLowerCase())
   ).filter((contribution) => {
+    const { startDate, endDate } = getDateRangeFromPreset(datePreset);
     if (!startDate && !endDate) return true;
-    const createdDate = contribution.created_at.split('T')[0];
+    const createdDate = new Date(contribution.created_at).toISOString().split('T')[0];
     if (startDate && createdDate < startDate) return false;
     if (endDate && createdDate > endDate) return false;
     return true;
@@ -230,12 +230,9 @@ export function Contributions() {
           {t('contribution.title')}
         </h1>
         <div className="flex items-center gap-3 flex-wrap">
-          <DateRangeFilter
-            startDate={startDate}
-            endDate={endDate}
-            onStartChange={setStartDate}
-            onEndChange={setEndDate}
-            onClear={() => { setStartDate(''); setEndDate(''); }}
+          <DatePresetFilter
+            value={datePreset}
+            onChange={setDatePreset}
           />
           {/* Search - Small and next to add button */}
           <div className="relative w-64">

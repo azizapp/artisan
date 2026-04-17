@@ -41,7 +41,10 @@
     "manage": "إدارة",
     "show": "عرض",
     "of": "من أصل",
-    "items": "عناصر"
+    "items": "عناصر",
+    "startDate": "من تاريخ",
+    "endDate": "إلى تاريخ",
+    "clearFilter": "مسح الفلتر"
   },
   "dashboard": {
     "title": "لوحة التحكم",
@@ -240,5 +243,18 @@
     "invalidDate": "تاريخ غير صالح"
   },
   "call": "اتصال",
-  "whatsapp": "واتساب"
+  "whatsapp": "واتساب",
+  "datePresets": {
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "lastMonth": "الشهر الماضي",
+    "firstQuarter": "ثلاثة أشهر الأولى",
+    "secondQuarter": "ثلاثة أشهر الثانية",
+    "sixMonths": "ستة أشهر",
+    "thisYear": "هذه السنة",
+    "lastYear": "السنة الماضية",
+    "all": "الكل"
+  }
 }

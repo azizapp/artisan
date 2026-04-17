@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { Pagination } from '../components/ui/Pagination';
+import { DatePresetFilter, getDateRangeFromPreset } from '../components/ui/DatePresetFilter';
 import { useArtisanStore } from '../stores/artisanStore';
 import { useTradeStore } from '../stores/tradeStore';
 import type { Artisan, ArtisanFormData, TradeFormData } from '../types';
@@ -122,6 +123,9 @@ export function Artisans() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  // Date preset filter state
+  const [datePreset, setDatePreset] = useState('all');
+
   useEffect(() => {
     fetchArtisans();
     fetchTrades();
@@ -130,14 +134,21 @@ export function Artisans() {
   // Reset to first page when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, datePreset]);
 
   const filteredArtisans = artisans.filter(
     (artisan) =>
       artisan.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       artisan.national_id.includes(searchTerm) ||
       artisan.shop_number.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).filter((artisan) => {
+    const { startDate, endDate } = getDateRangeFromPreset(datePreset);
+    if (!startDate && !endDate) return true;
+    const createdDate = new Date(artisan.created_at).toISOString().split('T')[0];
+    if (startDate && createdDate < startDate) return false;
+    if (endDate && createdDate > endDate) return false;
+    return true;
+  });
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredArtisans.length / pageSize);
@@ -283,10 +294,14 @@ export function Artisans() {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-2xl font-bold text-foreground hidden md:block">
           {t('artisan.title')}
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <DatePresetFilter
+            value={datePreset}
+            onChange={setDatePreset}
+          />
           {/* Search - Small and next to add button */}
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -592,7 +607,7 @@ export function Artisans() {
                 <p className="text-sm text-muted-foreground">{t('common.status')}</p>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   viewModal.artisan.is_active
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    ? 'bg-orange-500 text-white dark:bg-orange-900/30 dark:text-orange-400'
                     : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                 }`}>
                   {viewModal.artisan.is_active ? t('common.active') : t('common.inactive')}

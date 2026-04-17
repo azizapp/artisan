@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { BarChart3, TrendingUp, Download, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { DatePresetFilter, getDateRangeFromPreset } from '../components/ui/DatePresetFilter';
 import { useContributionStore } from '../stores/contributionStore';
 import { useExpenseStore } from '../stores/expenseStore';
 import { useArtisanStore } from '../stores/artisanStore';
@@ -41,7 +42,7 @@ export function Reports() {
   const { expenses, fetchExpenses } = useExpenseStore();
   const { artisans, fetchArtisans } = useArtisanStore();
 
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [datePreset, setDatePreset] = useState('all');
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [artisanData, setArtisanData] = useState<ArtisanContribution[]>([]);
 
@@ -52,6 +53,23 @@ export function Reports() {
   }, []);
 
   useEffect(() => {
+    // Apply date range filter inline
+    const { startDate, endDate } = getDateRangeFromPreset(datePreset);
+    const contribData = contributions.filter((c) => {
+      if (!startDate && !endDate) return true;
+      const d = new Date(c.created_at).toISOString().split('T')[0];
+      if (startDate && d < startDate) return false;
+      if (endDate && d > endDate) return false;
+      return true;
+    });
+    const expenseData = expenses.filter((e) => {
+      if (!startDate && !endDate) return true;
+      const d = new Date(e.created_at).toISOString().split('T')[0];
+      if (startDate && d < startDate) return false;
+      if (endDate && d > endDate) return false;
+      return true;
+    });
+
     // Calculate monthly data
     const months = [
       t('reports.jan'), t('reports.feb'), t('reports.mar'), t('reports.apr'),
@@ -59,18 +77,21 @@ export function Reports() {
       t('reports.sep'), t('reports.oct'), t('reports.nov'), t('reports.dec')
     ];
 
+    // Get year from date preset or use current year
+    const yearToShow = startDate ? new Date(startDate).getFullYear() : new Date().getFullYear();
+    
     const data: MonthlyData[] = months.map((month, index) => {
-      const monthContributions = contributions
+      const monthContributions = contribData
         .filter(c => {
           const date = new Date(c.payment_date);
-          return date.getMonth() === index && date.getFullYear() === selectedYear;
+          return date.getMonth() === index && date.getFullYear() === yearToShow;
         })
         .reduce((sum, c) => sum + c.amount, 0);
 
-      const monthExpenses = expenses
+      const monthExpenses = expenseData
         .filter(e => {
           const date = new Date(e.expense_date);
-          return date.getMonth() === index && date.getFullYear() === selectedYear;
+          return date.getMonth() === index && date.getFullYear() === yearToShow;
         })
         .reduce((sum, e) => sum + e.amount, 0);
 
@@ -86,7 +107,7 @@ export function Reports() {
 
     // Calculate artisan contributions
     const artisanTotals = artisans.map(artisan => {
-      const total = contributions
+      const total = contribData
         .filter(c => c.artisan_id === artisan.id)
         .reduce((sum, c) => sum + c.amount, 0);
       return {
@@ -96,17 +117,28 @@ export function Reports() {
     }).filter(a => a.total > 0).sort((a, b) => b.total - a.total).slice(0, 10);
 
     setArtisanData(artisanTotals);
-  }, [contributions, expenses, artisans, selectedYear, t]);
+  }, [contributions, expenses, artisans, datePreset, t]);
 
-  const totalContributions = contributions.reduce((sum, c) => sum + c.amount, 0);
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const netBalance = totalContributions - totalExpenses;
+  // Apply date range filter to contributions and expenses for summary cards
+  const { startDate: filterStart, endDate: filterEnd } = getDateRangeFromPreset(datePreset);
+  const filteredContributions = contributions.filter((c) => {
+    if (!filterStart && !filterEnd) return true;
+    const d = new Date(c.created_at).toISOString().split('T')[0];
+    if (filterStart && d < filterStart) return false;
+    if (filterEnd && d > filterEnd) return false;
+    return true;
+  });
+  const filteredExpenses = expenses.filter((e) => {
+    if (!filterStart && !filterEnd) return true;
+    const d = new Date(e.created_at).toISOString().split('T')[0];
+    if (filterStart && d < filterStart) return false;
+    if (filterEnd && d > filterEnd) return false;
+    return true;
+  });
 
-  const years = Array.from(new Set([
-    ...contributions.map(c => new Date(c.payment_date).getFullYear()),
-    ...expenses.map(e => new Date(e.expense_date).getFullYear()),
-    new Date().getFullYear(),
-  ])).sort((a, b) => b - a);
+  const totalFilteredContributions = filteredContributions.reduce((sum, c) => sum + c.amount, 0);
+  const totalFilteredExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const netBalance = totalFilteredContributions - totalFilteredExpenses;
 
   const COLORS = ['#aa3bff', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
 
@@ -119,7 +151,7 @@ export function Reports() {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `report-${selectedYear}.csv`;
+    link.download = `report-${datePreset}.csv`;
     link.click();
   };
 
@@ -127,20 +159,15 @@ export function Reports() {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--text-h)]">
+        <h1 className="text-2xl font-bold text-[var(--text-h)] hidden md:block">
           {t('reports.title')}
         </h1>
-        <div className="flex items-center gap-4">
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="px-4 py-2 rounded-sm border border-border bg-background text-foreground focus:border-ring outline-none"
-          >
-            {years.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-          <Button onClick={exportToCSV} variant="secondary">
+        <div className="flex items-center gap-4 flex-wrap">
+          <DatePresetFilter
+            value={datePreset}
+            onChange={setDatePreset}
+          />
+          <Button onClick={exportToCSV} variant="secondary" className="hidden md:inline-flex">
             <Download className="w-4 h-4" />
             {t('reports.exportCsv')}
           </Button>
@@ -155,7 +182,7 @@ export function Reports() {
               <div>
                 <p className="text-sm text-[var(--text)]">{t('dashboard.totalContributions')}</p>
                 <p className="text-2xl font-bold text-[var(--accent)]">
-                  {formatCurrency(totalContributions)}
+                  {formatCurrency(totalFilteredContributions)}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-[var(--accent-bg)]">
@@ -170,7 +197,7 @@ export function Reports() {
               <div>
                 <p className="text-sm text-[var(--text)]">{t('dashboard.totalExpenses')}</p>
                 <p className="text-2xl font-bold text-red-500">
-                  {formatCurrency(totalExpenses)}
+                  {formatCurrency(totalFilteredExpenses)}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-red-500/10">

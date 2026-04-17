@@ -48,7 +48,7 @@ export function Pagination({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t border-border">
       {/* Page size selector */}
-      <div className="flex items-center gap-2">
+      <div className="hidden md:flex items-center gap-2">
         <span className="text-sm text-muted-foreground">{t('common.show')}</span>
         <select
           value={pageSize}
@@ -65,7 +65,7 @@ export function Pagination({
       </div>
 
       {/* Page info */}
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground hidden md:block">
         {startItem} - {endItem} {t('common.of')} {totalItems}
       </div>
 
