@@ -67,29 +67,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <DesktopLayout>{children}</DesktopLayout>;
 }
 
-function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, user, checkAuth } = useAuthStore();
-  const isMobile = useIsMobile();
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (user?.role !== 'admin') {
-    return <Navigate to="/" replace />;
-  }
-
-  if (isMobile) {
-    return <MobileLayout>{children}</MobileLayout>;
-  }
-
-  return <DesktopLayout>{children}</DesktopLayout>;
-}
-
 // مسار خاص للحرفيين - يستخدم واجهة مختلفة للهاتف
 function ArtisanRoute() {
   const { isAuthenticated, checkAuth } = useAuthStore();
@@ -171,9 +148,9 @@ function App() {
         <Route
           path="/settings"
           element={
-            <AdminRoute>
+            <ProtectedRoute>
               <SettingsPage />
-            </AdminRoute>
+            </ProtectedRoute>
           }
         />
         <Route

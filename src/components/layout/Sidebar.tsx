@@ -18,7 +18,7 @@ import { useAuthStore } from '../../stores/authStore';
 
 export function Sidebar() {
   const { t } = useTranslation();
-  const { logout, user } = useAuthStore();
+  const { logout } = useAuthStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -28,10 +28,10 @@ export function Sidebar() {
     { path: '/contributions', icon: Wallet, label: t('nav.contributions') },
     { path: '/expenses', icon: Receipt, label: t('nav.expenses') },
     { path: '/reports', icon: BarChart3, label: t('nav.reports') },
-    { path: '/settings', icon: Settings, label: t('nav.settings'), adminOnly: true },
+    { path: '/settings', icon: Settings, label: t('nav.settings') },
   ];
 
-  const navItems = allNavItems.filter(item => !item.adminOnly || user?.role === 'admin');
+  const navItems = allNavItems;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

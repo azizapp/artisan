@@ -17,6 +17,7 @@ export interface Database {
           shop_number: string
           area: string
           employee_count: number
+          shop_type: string
           trade_id: string
           documents: Json
           is_active: boolean
@@ -30,6 +31,7 @@ export interface Database {
           shop_number: string
           area: string
           employee_count?: number
+          shop_type?: string
           trade_id: string
           documents?: Json
           is_active?: boolean
@@ -43,6 +45,7 @@ export interface Database {
           shop_number?: string
           area?: string
           employee_count?: number
+          shop_type?: string
           trade_id?: string
           documents?: Json
           is_active?: boolean
@@ -198,6 +201,36 @@ export interface Database {
           full_name?: string
           role?: string
           is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          type: string
+          title: string
+          description: string
+          created_by_name: string
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          type: string
+          title: string
+          description: string
+          created_by_name: string
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          type?: string
+          title?: string
+          description?: string
+          created_by_name?: string
+          is_read?: boolean
           created_at?: string
         }
         Relationships: []

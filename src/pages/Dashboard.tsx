@@ -74,29 +74,50 @@ interface ActivityItemProps {
 function ActivityItem({ icon, iconBg, title, description, workers, time, badge, badgeColor, onClick }: ActivityItemProps) {
   return (
     <div 
-      className="flex items-start gap-4 py-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 transition-colors"
+      className="flex items-center py-3 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 transition-colors"
       onClick={onClick}
     >
-      <div className={`p-2 rounded-full ${iconBg}`}>
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="text-sm text-muted-foreground truncate">
-              <span className="font-medium text-foreground">{title}</span>
-              <span className="mx-[10px]">|</span>
-              {description}
-              <span className="mx-[10px]">|</span>
-              <span className="text-xs font-medium text-primary">{workers} {workers === 1 ? 'عامل' : 'عمال'}</span>
-              {time && <><span className="mx-[10px]">|</span><span className="text-xs">{time}</span></>}
-            </p>
+      {/* Mobile Layout: 3 columns */}
+      <div className="flex md:hidden items-center w-full gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className={`p-2 rounded-full ${iconBg} shrink-0`}>
+            {icon}
           </div>
-          {badge && (
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${badgeColor}`}>
-              {badge}
-            </span>
-          )}
+          <span className="font-medium text-foreground text-sm truncate">{title}</span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <span className="text-sm font-bold text-foreground">{description.split(' ')[0]}</span>
+          <span className="text-[10px] text-muted-foreground">{description.split(' ').slice(1).join(' ')}</span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <span className="text-sm font-bold text-primary">{workers}</span>
+          <span className="text-[10px] text-muted-foreground">{workers === 1 ? 'عامل' : 'عمال'}</span>
+        </div>
+      </div>
+
+      {/* Desktop Layout: original */}
+      <div className="hidden md:flex items-start gap-4 w-full">
+        <div className={`p-2 rounded-full ${iconBg}`}>
+          {icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-sm text-muted-foreground truncate">
+                <span className="font-medium text-foreground">{title}</span>
+                <span className="mx-[10px]">|</span>
+                {description}
+                <span className="mx-[10px]">|</span>
+                <span className="text-xs font-medium text-primary">{workers} {workers === 1 ? 'عامل' : 'عمال'}</span>
+                {time && <><span className="mx-[10px]">|</span><span className="text-xs">{time}</span></>}
+              </p>
+            </div>
+            {badge && (
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${badgeColor}`}>
+                {badge}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>

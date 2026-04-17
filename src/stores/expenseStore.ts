@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { Expense, ExpenseFormData } from '../types';
+import { useNotificationStore } from './notificationStore';
+import { useAuthStore } from './authStore';
 
 interface ExpenseState {
   expenses: Expense[];
@@ -44,6 +46,14 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
 
       if (error) throw error;
       await get().fetchExpenses();
+      // Add notification
+      const userName = useAuthStore.getState().user?.full_name || 'النظام';
+      useNotificationStore.getState().addNotification({
+        type: 'expense',
+        title: 'مصروف جديد',
+        description: `تمت إضافة مصروف: ${data.subject} - ${data.amount}`,
+        created_by_name: userName,
+      });
       return { error: null };
     } catch (error) {
       return { error: error as Error };

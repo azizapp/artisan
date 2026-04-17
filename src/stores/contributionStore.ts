@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { Contribution, ContributionFormData } from '../types';
+import { useNotificationStore } from './notificationStore';
+import { useAuthStore } from './authStore';
 
 interface ContributionState {
   contributions: Contribution[];
@@ -69,6 +71,14 @@ export const useContributionStore = create<ContributionState>((set, get) => ({
 
       if (error) throw error;
       await get().fetchContributions();
+      // Add notification
+      const userName = useAuthStore.getState().user?.full_name || 'النظام';
+      useNotificationStore.getState().addNotification({
+        type: 'contribution',
+        title: 'مساهمة جديدة',
+        description: `تمت إضافة مساهمة بمبلغ ${data.amount} - ${data.occasion}`,
+        created_by_name: userName,
+      });
       return { error: null };
     } catch (error) {
       return { error: error as Error };

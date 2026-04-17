@@ -24,12 +24,12 @@ export function DatePresetFilter({ value, onChange }: DatePresetFilterProps) {
   ];
 
   return (
-    <div className="flex items-center gap-2">
-      <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+    <div className="flex items-center gap-1 md:gap-2">
+      <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-muted-foreground shrink-0" />
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="px-3 py-1.5 text-sm rounded-sm border border-border bg-transparent text-foreground focus:border-ring focus:ring-1 focus:ring-ring outline-none"
+        className="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm rounded-sm border border-border bg-transparent text-foreground focus:border-ring focus:ring-1 focus:ring-ring outline-none w-full"
       >
         {presets.map((preset) => (
           <option key={preset.key} value={preset.key}>

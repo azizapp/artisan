@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Moon, Sun, Globe, Bell } from 'lucide-react';
+import { Moon, Sun, Globe } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useAuthStore } from '../../stores/authStore';
+import { NotificationDropdown } from '../ui/NotificationDropdown';
 
 export function Header() {
   const { t } = useTranslation();
@@ -41,10 +42,7 @@ export function Header() {
         </button>
 
         {/* Notifications */}
-        <button className="p-2 rounded-lg hover:bg-muted transition-colors relative">
-          <Bell className="w-5 h-5 text-muted-foreground" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
+        <NotificationDropdown />
 
         {/* User Info */}
         <div className="flex items-center gap-3 ps-4 border-s border-border">

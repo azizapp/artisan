@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { User } from '../types';
+import { useNotificationStore } from './notificationStore';
+import { useAuthStore } from './authStore';
 
 interface UserFormData {
   email: string;
@@ -57,6 +59,14 @@ export const useUserStore = create<UserState>((set, get) => ({
       if (rpcError) throw rpcError;
 
       await get().fetchUsers();
+      // Add notification
+      const userName = useAuthStore.getState().user?.full_name || 'النظام';
+      useNotificationStore.getState().addNotification({
+        type: 'user',
+        title: 'مستخدم جديد',
+        description: `تمت إضافة المستخدم: ${data.full_name}`,
+        created_by_name: userName,
+      });
       return { error: null };
     } catch (error) {
       return { error: error as Error };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Moon, Sun, Globe, Type, Monitor, Briefcase, Plus, Edit2, Trash2, AlertTriangle, Users, Search, UserCheck, UserX } from 'lucide-react';
+import { Moon, Sun, Type, Monitor, Briefcase, Plus, Edit2, Trash2, AlertTriangle, Users, Search, UserCheck, UserX } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -8,6 +8,7 @@ import { Modal } from '../components/ui/Modal';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useTradeStore } from '../stores/tradeStore';
 import { useUserStore } from '../stores/userStore';
+import { useAuthStore } from '../stores/authStore';
 import { formatDate } from '../lib/utils';
 import type { Trade, User, UserRole } from '../types';
 
@@ -76,6 +77,8 @@ interface UserFormData {
 
 export function Settings() {
   const { t } = useTranslation();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'admin';
   const {
     theme,
     language,
@@ -364,7 +367,7 @@ export function Settings() {
         </Card>
 
         {/* Management Buttons */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className={`grid ${isAdmin ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
           {/* Trades Management Button */}
           <div className="cursor-pointer" onClick={() => setIsTradesSectionOpen(true)}>
             <Card className="hover:bg-muted/30 transition-colors h-full">
@@ -382,22 +385,24 @@ export function Settings() {
             </Card>
           </div>
 
-          {/* User Management Button */}
-          <div className="cursor-pointer" onClick={() => setIsUsersSectionOpen(true)}>
-            <Card className="hover:bg-muted/30 transition-colors h-full">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center text-center gap-2">
-                  <div className="p-3 rounded-xl bg-blue-500">
-                    <Users className="w-5 h-5 text-white" />
+          {/* User Management Button - Admin Only */}
+          {isAdmin && (
+            <div className="cursor-pointer" onClick={() => setIsUsersSectionOpen(true)}>
+              <Card className="hover:bg-muted/30 transition-colors h-full">
+                <CardContent className="p-4">
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="p-3 rounded-xl bg-blue-500">
+                      <Users className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground text-sm">{t('settings.userManagement')}</p>
+                      <p className="text-xs text-muted-foreground">{users.length} {t('user.title')}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-foreground text-sm">{t('settings.userManagement')}</p>
-                    <p className="text-xs text-muted-foreground">{users.length} {t('user.title')}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
 

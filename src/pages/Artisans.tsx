@@ -99,6 +99,7 @@ export function Artisans() {
     shop_number: '',
     area: '',
     employee_count: 1,
+    shop_type: 'owner' as const,
     trade_id: '',
     is_active: true,
   });
@@ -183,6 +184,7 @@ export function Artisans() {
         shop_number: artisan.shop_number,
         area: artisan.area,
         employee_count: artisan.employee_count,
+        shop_type: artisan.shop_type,
         trade_id: artisan.trade_id,
         is_active: artisan.is_active,
       });
@@ -195,6 +197,7 @@ export function Artisans() {
         shop_number: '',
         area: '',
         employee_count: 1,
+        shop_type: 'owner' as const,
         trade_id: '',
         is_active: true,
       });
@@ -350,6 +353,9 @@ export function Artisans() {
                     {t('artisan.area')}
                   </th>
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
+                    {t('artisan.shopStatus')}
+                  </th>
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
                     {t('common.status')}
                   </th>
                   <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">
@@ -376,6 +382,17 @@ export function Artisans() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {artisan.area}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        artisan.shop_type === 'owner'
+                          ? 'bg-blue-500/10 text-blue-500'
+                          : artisan.shop_type === 'tenant'
+                          ? 'bg-amber-500/10 text-amber-500'
+                          : 'bg-purple-500/10 text-purple-500'
+                      }`}>
+                        {artisan.shop_type === 'owner' ? t('artisan.isOwner') : artisan.shop_type === 'tenant' ? t('artisan.isTenant') : t('artisan.isManager')}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       <button
@@ -502,6 +519,22 @@ export function Artisans() {
             />
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
+                {t('artisan.shopStatus')} *
+              </label>
+              <select
+                value={formData.shop_type}
+                onChange={(e) => setFormData({ ...formData, shop_type: e.target.value as 'owner' | 'tenant' | 'manager' })}
+                className="w-full px-4 py-2 rounded-sm border border-input bg-transparent text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none"
+              >
+                <option value="owner">{t('artisan.isOwner')}</option>
+                <option value="tenant">{t('artisan.isTenant')}</option>
+                <option value="manager">{t('artisan.isManager')}</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
                 {t('artisan.trade')} *
               </label>
               <select
@@ -598,6 +631,18 @@ export function Artisans() {
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">{t('artisan.employeeCount')}</p>
                 <p className="font-medium text-foreground">{viewModal.artisan.employee_count}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">{t('artisan.shopStatus')}</p>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  viewModal.artisan.shop_type === 'owner'
+                    ? 'bg-blue-500/10 text-blue-500'
+                    : viewModal.artisan.shop_type === 'tenant'
+                    ? 'bg-amber-500/10 text-amber-500'
+                    : 'bg-purple-500/10 text-purple-500'
+                }`}>
+                  {viewModal.artisan.shop_type === 'owner' ? t('artisan.isOwner') : viewModal.artisan.shop_type === 'tenant' ? t('artisan.isTenant') : t('artisan.isManager')}
+                </span>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">{t('artisan.trade')}</p>

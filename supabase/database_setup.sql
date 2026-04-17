@@ -1,22 +1,20 @@
 -- ============================================
--- ملف شامل: حذف كل شيء وإعادة إنشاء قاعدة البيانات
--- شغل هذا الكود كاملاً في Supabase SQL Editor
+-- ArtisanManager - قاعدة البيانات الشاملة
+-- ملف واحد يحتوي على كل الجداول والسياسات والدوال
+-- شغّل هذا الكود كاملاً في Supabase SQL Editor
 -- ============================================
 
 -- ============================================
 -- 1. حذف كل شيء (الدوال، التريجرات، الجداول)
 -- ============================================
 
--- حذف التريجرات
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-
--- حذف الدوال
 DROP FUNCTION IF EXISTS public.handle_new_user();
 DROP FUNCTION IF EXISTS public.create_new_user(TEXT, TEXT, TEXT, TEXT, BOOLEAN);
 DROP FUNCTION IF EXISTS public.create_new_user(TEXT, TEXT, TEXT, BOOLEAN);
 
--- حذف الجداول (بالترتيب الصحيح بسبب العلاقات)
 DROP TABLE IF EXISTS settings CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS expenses CASCADE;
 DROP TABLE IF EXISTS contributions CASCADE;
 DROP TABLE IF EXISTS artisans CASCADE;
@@ -60,6 +58,7 @@ CREATE TABLE artisans (
   shop_number TEXT NOT NULL,
   area TEXT NOT NULL,
   employee_count INTEGER DEFAULT 0,
+  shop_type TEXT DEFAULT 'owner' CHECK (shop_type IN ('owner', 'tenant', 'manager')),
   trade_id UUID REFERENCES trades(id) ON DELETE SET NULL,
   documents JSONB DEFAULT '[]',
   is_active BOOLEAN DEFAULT true,
@@ -99,15 +98,29 @@ CREATE TABLE settings (
   user_id UUID UNIQUE REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- جدول الإشعارات
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type TEXT NOT NULL CHECK (type IN ('artisan', 'contribution', 'expense', 'trade', 'user')),
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  created_by_name TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- ============================================
 -- 4. إنشاء الفهارس
 -- ============================================
 CREATE INDEX idx_artisans_national_id ON artisans(national_id);
 CREATE INDEX idx_artisans_trade_id ON artisans(trade_id);
 CREATE INDEX idx_artisans_is_active ON artisans(is_active);
+CREATE INDEX idx_artisans_shop_type ON artisans(shop_type);
 CREATE INDEX idx_contributions_artisan_id ON contributions(artisan_id);
 CREATE INDEX idx_contributions_payment_date ON contributions(payment_date);
 CREATE INDEX idx_expenses_expense_date ON expenses(expense_date);
+CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC);
+CREATE INDEX idx_notifications_is_read ON notifications(is_read);
 
 -- ============================================
 -- 5. تفعيل Row Level Security
@@ -118,6 +131,7 @@ ALTER TABLE artisans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contributions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- 6. سياسات RLS - جدول المستخدمين
@@ -190,7 +204,16 @@ CREATE POLICY "Anyone can modify settings" ON settings
   FOR ALL USING (true);
 
 -- ============================================
--- 12. دالة إنشاء مستخدم جديد (RPC)
+-- 12. سياسات RLS - جدول الإشعارات
+-- ============================================
+CREATE POLICY "Anyone can view notifications" ON notifications
+  FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can modify notifications" ON notifications
+  FOR ALL USING (true);
+
+-- ============================================
+-- 13. دالة إنشاء مستخدم جديد (RPC)
 -- ============================================
 CREATE OR REPLACE FUNCTION public.create_new_user(
   p_email TEXT,
@@ -215,13 +238,12 @@ BEGIN
 END;
 $$;
 
--- إعطاء صلاحية التنفيذ
 GRANT EXECUTE ON FUNCTION public.create_new_user(TEXT, TEXT, TEXT, TEXT, BOOLEAN) TO anon;
 GRANT EXECUTE ON FUNCTION public.create_new_user(TEXT, TEXT, TEXT, TEXT, BOOLEAN) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.create_new_user(TEXT, TEXT, TEXT, TEXT, BOOLEAN) TO public;
 
 -- ============================================
--- 13. إدخال البيانات الافتراضية - المهن
+-- 14. إدخال البيانات الافتراضية - المهن
 -- ============================================
 INSERT INTO trades (name_ar, name_fr) VALUES
   ('نجار', 'Menuisier'),
@@ -236,7 +258,7 @@ INSERT INTO trades (name_ar, name_fr) VALUES
   ('معلم بناء', 'Maçon');
 
 -- ============================================
--- 14. إدخال مستخدم إداري افتراضي
+-- 15. إدخال مستخدم إداري افتراضي
 -- ============================================
 INSERT INTO users (email, full_name, password, role, is_active)
 VALUES ('admin@artisan.com', 'المسؤول', 'admin123', 'admin', true);

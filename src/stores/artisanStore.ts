@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { Artisan, ArtisanFormData } from '../types';
+import { useNotificationStore } from './notificationStore';
+import { useAuthStore } from './authStore';
 
 interface ArtisanState {
   artisans: Artisan[];
@@ -31,7 +33,7 @@ export const useArtisanStore = create<ArtisanState>((set, get) => ({
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      set({ artisans: data || [] });
+      set({ artisans: (data || []) as Artisan[] });
     } catch (error) {
       set({ error: (error as Error).message });
     } finally {
@@ -51,7 +53,7 @@ export const useArtisanStore = create<ArtisanState>((set, get) => ({
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Artisan;
     } catch (error) {
       console.error('Error fetching artisan:', error);
       return null;
@@ -74,6 +76,14 @@ export const useArtisanStore = create<ArtisanState>((set, get) => ({
 
       if (error) throw error;
       await get().fetchArtisans();
+      // Add notification
+      const userName = useAuthStore.getState().user?.full_name || 'النظام';
+      useNotificationStore.getState().addNotification({
+        type: 'artisan',
+        title: 'حرفي جديد',
+        description: `تمت إضافة الحرفي ${data.full_name}`,
+        created_by_name: userName,
+      });
       return { error: null };
     } catch (error) {
       return { error: error as Error };

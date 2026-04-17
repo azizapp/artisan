@@ -20,6 +20,8 @@ export interface Trade {
 }
 
 // Artisan Types
+export type ShopType = 'owner' | 'tenant' | 'manager';
+
 export interface Artisan {
   id: string;
   full_name: string;
@@ -28,6 +30,7 @@ export interface Artisan {
   shop_number: string;
   area: string;
   employee_count: number;
+  shop_type: ShopType;
   trade_id: string;
   trade?: Trade;
   documents: any;
@@ -86,6 +89,26 @@ export interface DashboardStats {
   total_expenses: number;
 }
 
+// Notification Types
+export type NotificationType = 'artisan' | 'contribution' | 'expense' | 'trade' | 'user';
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  description: string;
+  created_by_name: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationFormData {
+  type: NotificationType;
+  title: string;
+  description: string;
+  created_by_name: string;
+}
+
 // Form Types
 export interface ArtisanFormData {
   full_name: string;
@@ -94,6 +117,7 @@ export interface ArtisanFormData {
   shop_number: string;
   area: string;
   employee_count: number;
+  shop_type: ShopType;
   trade_id: string;
   is_active: boolean;
 }

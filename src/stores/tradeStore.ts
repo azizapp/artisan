@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { Trade, TradeFormData } from '../types';
+import { useNotificationStore } from './notificationStore';
+import { useAuthStore } from './authStore';
 
 interface TradeState {
   trades: Trade[];
@@ -43,6 +45,14 @@ export const useTradeStore = create<TradeState>((set, get) => ({
 
       if (error) throw error;
       await get().fetchTrades();
+      // Add notification
+      const userName = useAuthStore.getState().user?.full_name || 'النظام';
+      useNotificationStore.getState().addNotification({
+        type: 'trade',
+        title: 'مهنة جديدة',
+        description: `تمت إضافة المهنة: ${data.name_ar}`,
+        created_by_name: userName,
+      });
       return { error: null };
     } catch (error) {
       return { error: error as Error };
